@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Basketball Arcade Tournament 2026</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Montserrat:wght@400;700&display=swap');
+        
+        body { margin: 0; background: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+        #game-container { width: 100%; max-width: 420px; text-align: center; padding: 10px; }
+        
+        #hud { display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 8px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); font-size: 13px; }
+        
+        canvas { background: #b45309; background: linear-gradient(to bottom, #78350f, #b45309); border: 3px solid #fff; border-radius: 14px; touch-action: none; display: block; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .screen { position: absolute; inset: 10px; background: rgba(15, 23, 42, 0.96); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; border-radius: 14px; padding: 20px; overflow-y: auto; }
+        .hidden { display: none !important; }
+        
+        .btn { padding: 12px 30px; background: #f97316; border: none; color: white; border-radius: 25px; font-weight: bold; cursor: pointer; margin-top: 15px; font-family: 'Russo One'; box-shadow: 0 4px 15px rgba(249,115,22,0.4); }
+        .btn:active { transform: scale(0.97); }
+
+        .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; width: 100%; }
+        .team-card { background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .team-card.selected { border-color: #f97316; background: rgba(249,115,22,0.2); }
+
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { background: rgba(249,115,22,0.3); font-family: 'Russo One'; }
+
+        #timer-bar { font-family: 'Russo One'; font-size: 16px; margin: 6px 0; color: #fbbf24; text-shadow: 0 0 8px rgba(251,191,36,0.5); }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="hud">
+        <div id="user-hud">LAL: 0</div>
+        <div id="timer-bar">TIME: 30s</div>
+        <div id="opp-hud">AI: 0</div>
+    </div>
+    
+    <canvas id="gameCanvas" width="400" height="480"></canvas>
+    
+    <!-- Menu Screen -->
+    <div id="menu-screen" class="screen">
+        <h2 style="font-family:'Russo One'; color:#fb923c; margin-bottom:2px; font-size:18px;">ARCADE TOURNAMENT</h2>
+        <p style="font-size:11px; color:#94a3b8; margin-bottom:8px;">CHOOSE YOUR FRANCHISE TEAM</p>
+        
+        <div class="team-grid">
+            <div class="team-card selected" onclick="selectTeam('LAKERS', '💛')" id="card-LAKERS">LAKERS 💛</div>
+            <div class="team-card" onclick="selectTeam('BULLS', '🐂')" id="card-BULLS">BULLS 🐂</div>
+            <div class="team-card" onclick="selectTeam('WARRIORS', '🌉')" id="card-WARRIORS">WARRIORS 🌉</div>
+            <div class="team-card" onclick="selectTeam('CELTICS', '☘️')" id="card-CELTICS">CELTICS ☘️</div>
+        </div>
+
+        <h3 style="font-size:12px; margin: 8px 0 4px 0; font-family:'Russo One'; color:#f97316;">POINTS TABLE</h3>
+        <table>
+            <thead>
+                <tr><th>Team</th><th>P</th><th>W</th><th>Pts</th></tr>
+            </thead>
+            <tbody id="points-table-body"></tbody>
+        </table>
+
+        <button class="btn" onclick="startTournamentMatch()">START BATTLE</button>
+    </div>
+
+    <!-- Match Over Screen -->
+    <div id="gameover-screen" class="screen hidden">
+        <h2 id="winner-title" style="font-family:'Russo One'; font-size:20px; color:#fb923c; margin-bottom:10px;">MATCH OVER</h2>
+        <p id="final-stats" style="font-size:13px; margin-bottom:15px; line-height: 1.5;"></p>
+        <button class="btn" onclick="openMenuFromOver()">CONTINUE TOURNAMENT</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let selectedTeam = 'LAKERS';
+    let teamFlag = '💛';
+    let opponents = ['BULLS', 'WARRIORS', 'CELTICS'];
+    let currentOppIndex = 0;
+    let oppTeam = opponents[currentOppIndex];
+    
+    let userScore = 0;
+    let aiScore = 0;
+    let timeLeft = 30;
+    let gameInterval = null;
+    let matchActive = false;
+
+    let standings = {
+        'LAKERS': {p: 0, w: 0, pts: 0},
+        'BULLS': {p: 0, w: 0, pts: 0},
+        'WARRIORS': {p: 0, w: 0, pts: 0},
+        'CELTICS': {p: 0, w: 0, pts: 0}
+    };
+
+    let ball = { x: 200, y: 410, radius: 12, vx: 0, vy: 0, active: false };
+    let defender = { x: 170, y: 115, w: 60, h: 35, dir: 2 };
+
+    let audioCtx = null;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+        try {
+            initAudio();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if(type === 'shoot') {
+                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+            } else if(type === 'score') {
+                let now = audioCtx.currentTime;
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(350, now);
+                osc.frequency.setValueAtTime(550, now + 0.1);
+                osc.frequency.setValueAtTime(750, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now); osc.stop(now + 0.5);
+            } else if(type === 'block') {
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(60, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            }
+        } catch(e){}
+    }
+
+    window.onload = function() {
+        let saved = localStorage.getItem('basketball_arcade_standings');
+        if(saved) standings = JSON.parse(saved);
+        updateTableHTML();
+    }
+
+    function saveTableData() {
+        localStorage.setItem('basketball_arcade_standings', JSON.stringify(standings));
+    }
+
+    function updateTableHTML() {
+        let tbody = document.getElementById('points-table-body');
+        tbody.innerHTML = '';
+        for(let team in standings) {
+            let row = `<tr>
+                <td style="text-align:left; font-weight:bold; ${team===selectedTeam?'color:#fb923c;':''}">${team}</td>
+                <td>${standings[team].p}</td>
+                <td>${standings[team].w}</td>
+                <td style="font-family:'Russo One'; color:#fbbf24;">${standings[team].pts}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        }
+    }
+
+    function selectTeam(team, flag) {
+        selectedTeam = team;
+        teamFlag = flag;
+        document.querySelectorAll('.team-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById(`card-${team}`).classList.add('selected');
+        opponents = ['LAKERS', 'BULLS', 'WARRIORS', 'CELTICS'].filter(t => t !== team);
+        currentOppIndex = 0;
+        oppTeam = opponents[currentOppIndex];
+        updateTableHTML();
+    }
+
+    function startTournamentMatch() {
+        userScore = 0; aiScore = 0; timeLeft = 30;
+        matchActive = true;
+        document.getElementById('menu-screen').classList.add('hidden');
+        document.getElementById('user-hud').innerText = `${teamFlag} ${userScore}`;
+        document.getElementById('opp-hud').innerText = `AI: ${aiScore}`;
+        document.getElementById('timer-bar').innerText = `TIME: ${timeLeft}s`;
+
+        // Timer countdown every second
+        gameInterval = setInterval(() => {
+            if(!matchActive) return;
+            timeLeft--;
+            document.getElementById('timer-bar').innerText = `TIME: ${timeLeft}s`;
+            
+            // AI occasionally scores points automatically to create tension
+            if(Math.random() < 0.45) {
+                aiScore += Math.random() < 0.3 ? 3 : 2;
+                document.getElementById('opp-hud').innerText = `AI: ${aiScore}`;
+            }
+
+            if(timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function drawHoop() {
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(195, 10, 10, 45);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
+        ctx.fillRect(130, 30, 140, 50);
+        ctx.strokeRect(130, 30, 140, 50);
+
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(170, 45, 60, 25);
+
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(200, 110, 25, 0, Math.PI, false);
+        ctx.stroke();
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        for(let i = 178; i <= 222; i += 7) {
+            ctx.beginPath();
+            ctx.moveTo(i, 110);
+            ctx.lineTo(i + (i < 200 ? -4 : 4), 140);
+            ctx.stroke();
+        }
+    }
+
+    function drawDefender() {
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(defender.x, defender.y, defender.w, defender.h);
+        ctx.fillStyle = '#fbcfe8';
+        ctx.beginPath(); ctx.arc(defender.x + defender.w/2, defender.y - 6, 8, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(defender.x - 4, defender.y + 4, 6, 12);
+        ctx.fillRect(defender.x + defender.w - 2, defender.y + 4, 6, 12);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, 400, 480);
+        drawHoop();
+        drawDefender();
+
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    function update() {
+        if (matchActive) {
+            // Move defender smoothly left and right to block shots
+            defender.x += defender.dir;
+            if (defender.x < 145 || defender.x > 235) {
+                defender.dir *= -1;
+            }
+
+            if (ball.active) {
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+
+                if (ball.y <= 112) {
+                    ball.active = false;
+                    let blocked = (ball.x > defender.x - 8 && ball.x < defender.x + defender.w + 8);
+                    let inHoop = (ball.x >= 178 && ball.x <= 222);
+
+                    if (blocked) {
+                        playSound('block');
+                    } else if (inHoop) {
+                        playSound('score');
+                        userScore += 3;
+                        document.getElementById('user-hud').innerText = `${teamFlag} ${userScore}`;
+                    } else {
+                        playSound('block');
+                    }
+                    
+                    // Reset ball instantly for next shot
+                    ball = { x: 200, y: 410, radius: 12, vx: 0, vy: 0, active: false };
+                }
+            }
+        }
+        draw();
+        requestAnimationFrame(update);
+    }
+
+    function endGame() {
+        matchActive = false;
+        clearInterval(gameInterval);
+        document.getElementById('gameover-screen').classList.remove('hidden');
+        
+        if(!standings[selectedTeam]) standings[selectedTeam] = {p:0, w:0, pts:0};
+        if(!standings[oppTeam]) standings[oppTeam] = {p:0, w:0, pts:0};
+
+        standings[selectedTeam].p += 1;
+        standings[oppTeam].p += 1;
+
+        let resultText = "";
+        if (userScore > aiScore) {
+            standings[selectedTeam].w += 1;
+            standings[selectedTeam].pts += 3;
+            resultText = `VICTORY! YOU WON AGAINST ${oppTeam} 🏆\nYour Score: ${userScore} | AI Score: ${aiScore}\n(+3 Points)`;
+        } else if (userScore < aiScore) {
+            standings[oppTeam].w += 1;
+            standings[oppTeam].pts += 3;
+            resultText = `DEFEAT! ${oppTeam} WON THE MATCH ❌\nYour Score: ${userScore} | AI Score: ${aiScore}`;
+        } else {
+            standings[selectedTeam].pts += 1;
+            standings[oppTeam].pts += 1;
+            resultText = `MATCH DRAW! 🤝\nYour Score: ${userScore} | AI Score: ${aiScore}\n(+1 Point)`;
+        }
+
+        saveTableData();
+        updateTableHTML();
+        document.getElementById('final-stats').innerText = resultText;
+
+        currentOppIndex = (currentOppIndex + 1) % opponents.length;
+        oppTeam = opponents[currentOppIndex];
+    }
+
+    function openMenuFromOver() {
+        document.getElementById('gameover-screen').classList.add('hidden');
+        document.getElementById('menu-screen').classList.remove('hidden');
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+        if (!matchActive || ball.active) return;
+        const rect = canvas.getBoundingClientRect();
+        let clientX = e.clientX - rect.left;
+        
+        playSound('shoot');
+        let targetX = clientX;
+        let targetY = 110;
+        ball.vx = (targetX - ball.x) / 12;
+        ball.vy = (targetY - ball.y) / 12;
+        ball.active = true;
+    });
+
+    update();
+</script>
+</body>
+</html>

@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Apex Speed Racer - Nitro & Garage Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: #050508;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            height: 100vh;
+            max-height: 780px;
+            background: #111;
+            border-left: 10px solid #222;
+            border-right: 10px solid #222;
+            box-shadow: 0 0 50px rgba(0, 242, 254, 0.2);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* HUD Dashboard */
+        #hud {
+            position: absolute;
+            top: 12px;
+            left: 10px;
+            right: 10px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .hud-card {
+            background: rgba(10, 15, 30, 0.85);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            padding: 5px 3px;
+            border-radius: 8px;
+            color: #fff;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .hud-label {
+            font-size: 8px;
+            color: #8a99ad;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #00f2fe;
+            margin-top: 2px;
+        }
+
+        /* Nitro Bar UI */
+        #nitro-container {
+            position: absolute;
+            top: 65px;
+            left: 12px;
+            right: 12px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 242, 254, 0.4);
+            z-index: 10;
+        }
+
+        #nitro-bar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #00f2fe, #ff0055);
+            transition: width 0.1s linear;
+        }
+
+        /* Overlays (Garage / Game Over) */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 7, 12, 0.94);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 30;
+            backdrop-filter: blur(10px);
+            padding: 20px;
+        }
+
+        .overlay h1 {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            background-clip:text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Garage Car Selector */
+        .garage-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            border-radius: 12px;
+            padding: 15px 10px;
+        }
+
+        .car-display {
+            text-align: center;
+        }
+
+        .car-preview-box {
+            width: 80px;
+            height: 120px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .car-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00f2fe;
+        }
+
+        .car-stat {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .nav-btn {
+            background: rgba(0, 242, 254, 0.2);
+            border: 1px solid #00f2fe;
+            color: #00f2fe;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-board-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            width: 85%;
+            text-align: center;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .score-row span.val {
+            color: #00f2fe;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 12px 36px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #05070c;
+            background: linear-gradient(45deg, #00f2fe, #00c6ff);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Controls */
+        #mobile-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 20;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .control-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 242, 254, 0.4);
+            color: #00f2fe;
+            font-size: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+            touch-action: manipulation;
+        }
+
+        .nitro-btn {
+            border-color: #ff0055;
+            color: #ff0055;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .nitro-btn:active, .nitro-btn.active {
+            background: rgba(255, 0, 85, 0.4);
+            box-shadow: 0 0 15px #ff0055;
+        }
+
+        .hide { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- HUD Dashboard -->
+        <div id="hud">
+            <div class="hud-card">
+                <div class="hud-label">Speed</div>
+                <div class="hud-value"><span id="speed">0</span> <small>KM/H</small></div>
+            </div>
+            <div class="hud-card">
+                <div class="hud-label">Distance</div>
+                <div class="hud-value"><span id="distance">0</span> <small>M</small></div>
+            </div>
+            <div class="hud-card">
+                <div class="hud-label">Score</div>
+                <div class="hud-value" id="score">0</div>
+            </div>
+            <div class="hud-card" style="border-color: rgba(255, 215, 0, 0.5);">
+                <div class="hud-label" style="color: #ffd700;">Best</div>
+                <div class="hud-value" id="high-score" style="color: #ffd700;">0</div>
+            </div>
+        </div>
+
+        <!-- Nitro Bar UI -->
+        <div id="nitro-container">
+            <div id="nitro-bar"></div>
+        </div>
+
+        <!-- Garage & Start Screen -->
+        <div id="start-screen" class="overlay">
+            <h1>GARAGE</h1>
+            <p style="color: #a0aec0; font-size: 11px;">Select Your Supercar</p>
+
+            <div class="garage-container">
+                <button class="nav-btn" onclick="prevCar()">◀</button>
+                <div class="car-display">
+                    <canvas id="previewCanvas" width="80" height="120"></canvas>
+                    <div class="car-name" id="selected-car-name">Cyan Phantom</div>
+                    <div class="car-stat" id="selected-car-stat">Top Speed: High | Nitro: Standard</div>
+                </div>
+                <button class="nav-btn" onclick="nextCar()">▶</button>
+            </div>
+
+            <div class="score-board-box">
+                <div class="score-row">
+                    <span>TOP HIGH SCORE</span>
+                    <span class="val" id="start-high-score" style="color: #ffd700;">0</span>
+                </div>
+            </div>
+
+            <button class="btn" onclick="startGame()">RACE NOW</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="overlay hide">
+            <h1 style="background: linear-gradient(45deg, #ff0844, #ffb199); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">CRASHED!</h1>
+            
+            <div class="score-board-box">
+                <div class="score-row">
+                    <span>FINAL SCORE</span>
+                    <span class="val" id="final-score">0</span>
+                </div>
+                <div class="score-row">
+                    <span>DISTANCE</span>
+                    <span class="val" id="final-distance">0 M</span>
+                </div>
+                <div class="score-row" style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 6px; margin-top: 6px;">
+                    <span style="color: #ffd700;">BEST SCORE</span>
+                    <span class="val" id="final-high-score" style="color: #ffd700;">0</span>
+                </div>
+            </div>
+
+            <button class="btn" onclick="startGame()">RESTART</button>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Touch Controls -->
+        <div id="mobile-controls">
+            <div class="control-group">
+                <div class="control-btn" id="btn-left">◀</div>
+                <div class="control-btn" id="btn-right">▶</div>
+            </div>
+            <div class="control-btn nitro-btn" id="btn-nitro">N2O</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const previewCtx = previewCanvas.getContext('2d');
+
+        // Elements
+        const scoreEl = document.getElementById('score');
+        const speedEl = document.getElementById('speed');
+        const distanceEl = document.getElementById('distance');
+        const highScoreEl = document.getElementById('high-score');
+        const startHighScoreEl = document.getElementById('start-high-score');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalDistanceEl = document.getElementById('final-distance');
+        const finalHighScoreEl = document.getElementById('final-high-score');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const nitroBar = document.getElementById('nitro-bar');
+
+        // Garage Supercars Data
+        const carsData = [
+            { name: 'Cyan Phantom', color: '#00f2fe', stat: 'Top Speed: High | Nitro: Standard', speedBoost: 1.0, nitroRate: 1.0 },
+            { name: 'Inferno Red', color: '#ff0844', stat: 'Top Speed: Extreme | Nitro: Fast Drain', speedBoost: 1.25, nitroRate: 1.4 },
+            { name: 'Neon Gold', color: '#ffd700', stat: 'Top Speed: Balanced | Nitro: Long Lasting', speedBoost: 1.1, nitroRate: 0.7 }
+        ];
+        let currentCarIndex = 0;
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Sound System
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() { if (!audioCtx) audioCtx = new AudioCtx(); }
+
+        function playEngineSound(freq) {
+            if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e){}
+        }
+
+        function playCrashSound() {
+            if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.5);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } catch(e){}
+        }
+
+        // Game State Variables
+        let isPlaying = false;
+        let score = 0;
+        let distance = 0;
+        let baseSpeed = 7;
+        let gameSpeed = 7;
+        let nitroFuel = 100;
+        let isNitroActive = false;
+        let highScore = localStorage.getItem('apex_high_score') || 0;
+        
+        let roadOffset = 0;
+        let player = { x: 0, y: 0, w: 48, h: 90, tilt: 0 };
+        let enemies = [];
+        let particles = [];
+        let keys = { ArrowLeft: false, ArrowRight: false, Space: false };
+
+        highScoreEl.innerText = highScore;
+        startHighScoreEl.innerText = highScore;
+
+        // Input Controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') keys.ArrowLeft = true;
+            if (e.key === 'ArrowRight') keys.ArrowRight = true;
+            if (e.key === ' ' || e.key === 'Shift') keys.Space = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') keys.ArrowLeft = false;
+            if (e.key === 'ArrowRight') keys.ArrowRight = false;
+            if (e.key === ' ' || e.key === 'Shift') keys.Space = false;
+        });
+
+        const btnLeft = document.getElementById('btn-left');
+        const btnRight = document.getElementById('btn-right');
+        const btnNitro = document.getElementById('btn-nitro');
+
+        const bindTouch = (elem, key) => {
+            elem.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+            elem.addEventListener('touchend', () => keys[key] = false);
+            elem.addEventListener('mousedown', () => keys[key] = true);
+            elem.addEventListener('mouseup', () => keys[key] = false);
+        };
+        bindTouch(btnLeft, 'ArrowLeft');
+        bindTouch(btnRight, 'ArrowRight');
+        bindTouch(btnNitro, 'Space');
+
+        // Garage Controls
+        function updateGarageUI() {
+            let car = carsData[currentCarIndex];
+            document.getElementById('selected-car-name').innerText = car.name;
+            document.getElementById('selected-car-name').style.color = car.color;
+            document.getElementById('selected-car-stat').innerText = car.stat;
+
+            // Render Preview
+            previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+            drawCarOnCtx(previewCtx, 16, 15, 48, 90, car.color, true, 0);
+        }
+
+        function prevCar() {
+            currentCarIndex = (currentCarIndex - 1 + carsData.length) % carsData.length;
+            updateGarageUI();
+        }
+
+        function nextCar() {
+            currentCarIndex = (currentCarIndex + 1) % carsData.length;
+            updateGarageUI();
+        }
+
+        updateGarageUI();
+
+        function startGame() {
+            initAudio();
+            isPlaying = true;
+            score = 0;
+            distance = 0;
+            baseSpeed = 7 * carsData[currentCarIndex].speedBoost;
+            gameSpeed = baseSpeed;
+            nitroFuel = 100;
+            
+            player.x = (canvas.width / 2) - (player.w / 2);
+            player.y = canvas.height - 120;
+            player.tilt = 0;
+
+            enemies = [];
+            particles = [];
+
+            startScreen.classList.add('hide');
+            gameOverScreen.classList.add('hide');
+
+            createEnemy(-200);
+            createEnemy(-500);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function createEnemy(yPos) {
+            let roadMargin = 40;
+            let maxX = canvas.width - roadMargin - 50;
+            let minX = roadMargin + 10;
+            let x = Math.floor(Math.random() * (maxX - minX)) + minX;
+            let colors = ['#00f2fe', '#f7b731', '#26de81', '#a55eea'];
+            let color = colors[Math.floor(Math.random() * colors.length)];
+
+            enemies.push({ x: x, y: yPos, w: 48, h: 90, color: color, speedMult: Math.random() * 0.3 + 0.8 });
+        }
+
+        // Draw Supercar Graphics
+        function drawCarOnCtx(targetCtx, x, y, w, h, color, isPlayer = false, tilt = 0, isNitro = false) {
+            targetCtx.save();
+            targetCtx.translate(x + w/2, y + h/2);
+            targetCtx.rotate(tilt * Math.PI / 180);
+
+            // Shadow
+            targetCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            targetCtx.fillRect(-w/2 + 4, -h/2 + 8, w, h);
+
+            // Wheels
+            targetCtx.fillStyle = '#111';
+            targetCtx.fillRect(-w/2 - 3, -h/2 + 12, 6, 18);
+            targetCtx.fillRect(w/2 - 3, -h/2 + 12, 6, 18);
+            targetCtx.fillRect(-w/2 - 3, h/2 - 26, 6, 20);
+            targetCtx.fillRect(w/2 - 3, h/2 - 26, 6, 20);
+
+            // Body
+            let grad = targetCtx.createLinearGradient(0, -h/2, 0, h/2);
+            grad.addColorStop(0, color);
+            grad.addColorStop(1, '#000');
+            targetCtx.fillStyle = grad;
+            
+            targetCtx.beginPath();
+            targetCtx.moveTo(-w/2 + 8, -h/2);
+            targetCtx.lineTo(w/2 - 8, -h/2);
+            targetCtx.lineTo(w/2, -h/2 + 20);
+            targetCtx.lineTo(w/2 + 2, h/2 - 10);
+            targetCtx.lineTo(w/2 - 6, h/2);
+            targetCtx.lineTo(-w/2 + 6, h/2);
+            targetCtx.lineTo(-w/2 - 2, h/2 - 10);
+            targetCtx.lineTo(-w/2, -h/2 + 20);
+            targetCtx.closePath();
+            targetCtx.fill();
+
+            // Glass Roof
+            targetCtx.fillStyle = '#050a14';
+            targetCtx.beginPath();
+            targetCtx.moveTo(-w/2 + 10, -h/2 + 25);
+            targetCtx.lineTo(w/2 - 10, -h/2 + 25);
+            targetCtx.lineTo(w/2 - 12, -h/2 + 50);
+            targetCtx.lineTo(-w/2 + 12, -h/2 + 50);
+            targetCtx.closePath();
+            targetCtx.fill();
+
+            // Lights & Nitro Flames
+            if (isPlayer) {
+                targetCtx.fillStyle = '#00f2fe';
+                targetCtx.shadowColor = '#00f2fe';
+                targetCtx.shadowBlur = 10;
+                targetCtx.fillRect(-w/2 + 6, -h/2 + 2, 8, 4);
+                targetCtx.fillRect(w/2 - 14, -h/2 + 2, 8, 4);
+
+                // Nitro Flame Thruster
+                if (isNitro) {
+                    targetCtx.fillStyle = '#ff0055';
+                    targetCtx.shadowColor = '#ff0055';
+                    targetCtx.shadowBlur = 20;
+                    targetCtx.fillRect(-w/2 + 14, h/2, 20, 25 + Math.random() * 10);
+                }
+            } else {
+                targetCtx.fillStyle = '#ff0844';
+                targetCtx.shadowColor = '#ff0844';
+                targetCtx.shadowBlur = 8;
+                targetCtx.fillRect(-w/2 + 8, h/2 - 3, 10, 3);
+                targetCtx.fillRect(w/2 - 18, h/2 - 3, 10, 3);
+            }
+
+            targetCtx.restore();
+        }
+
+        function drawRoad() {
+            ctx.fillStyle = '#14171d';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let curbH = 30;
+            let curbY = roadOffset % (curbH * 2);
+            for (let y = -curbH * 2; y < canvas.height + curbH; y += curbH) {
+                let isRed = Math.floor((y - curbY) / curbH) % 2 === 0;
+                ctx.fillStyle = isRed ? '#ff0844' : '#ffffff';
+                ctx.fillRect(15, y + curbY, 12, curbH);
+                ctx.fillRect(canvas.width - 27, y + curbY, 12, curbH);
+            }
+
+            ctx.strokeStyle = isNitroActive ? '#ff0055' : '#ffffff';
+            ctx.lineWidth = 6;
+            ctx.setLineDash([40, 40]);
+            ctx.lineDashOffset = -roadOffset;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function createExplosion(x, y) {
+            for (let i = 0; i < 40; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12,
+                    size: Math.random() * 6 + 3,
+                    color: ['#ff0844', '#ffb199', '#ffd700', '#ffffff'][Math.floor(Math.random() * 4)],
+                    life: 30
+                });
+            }
+        }
+
+        function gameLoop() {
+            if (!isPlaying) return;
+
+            // Handle Nitro Booster
+            let carSpec = carsData[currentCarIndex];
+            if (keys.Space && nitroFuel > 0) {
+                isNitroActive = true;
+                gameSpeed = baseSpeed * 1.8;
+                nitroFuel -= 0.6 * carSpec.nitroRate;
+                if (nitroFuel < 0) nitroFuel = 0;
+                btnNitro.classList.add('active');
+            } else {
+                isNitroActive = false;
+                gameSpeed = baseSpeed;
+                if (nitroFuel < 100) nitroFuel += 0.15; // Slowly Recharge
+                btnNitro.classList.remove('active');
+            }
+            nitroBar.style.width = nitroFuel + '%';
+
+            roadOffset += gameSpeed;
+
+            // Player Movement
+            if (keys.ArrowLeft && player.x > 35) {
+                player.x -= 7;
+                player.tilt = -7;
+            } else if (keys.ArrowRight && player.x < canvas.width - player.w - 35) {
+                player.x += 7;
+                player.tilt = 7;
+            } else {
+                player.tilt = 0;
+            }
+
+            // Render World
+            drawRoad();
+
+            // Draw Selected Car
+            drawCarOnCtx(ctx, player.x, player.y, player.w, player.h, carSpec.color, true, player.tilt, isNitroActive);
+
+            if (Math.random() < 0.3) playEngineSound((isNitroActive ? 120 : 60) + gameSpeed * 5);
+
+            // Enemies Loop
+            enemies.forEach((enemy, index) => {
+                enemy.y += gameSpeed * enemy.speedMult;
+
+                drawCarOnCtx(ctx, enemy.x, enemy.y, enemy.w, enemy.h, enemy.color, false);
+
+                if (enemy.y > canvas.height + 100) {
+                    enemies.splice(index, 1);
+                    createEnemy(-150);
+                    score += isNitroActive ? 20 : 10;
+                    baseSpeed += 0.15;
+                }
+
+                // Collision Detection
+                if (
+                    player.x < enemy.x + enemy.w - 6 &&
+                    player.x + player.w > enemy.x + 6 &&
+                    player.y < enemy.y + enemy.h - 8 &&
+                    player.y + player.h > enemy.y + 8
+                ) {
+                    createExplosion(player.x + player.w/2, player.y + player.h/2);
+                    playCrashSound();
+                    endGame();
+                }
+            });
+
+            // Particles
+            particles.forEach((p, index) => {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                if (p.life <= 0) particles.splice(index, 1);
+            });
+
+            // Update Stats
+            distance += Math.floor(gameSpeed / 4);
+            speedEl.innerText = Math.floor(gameSpeed * 17);
+            distanceEl.innerText = distance;
+            scoreEl.innerText = score;
+
+            if (isPlaying) requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            isPlaying = false;
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('apex_high_score', highScore);
+            }
+
+            highScoreEl.innerText = highScore;
+            finalScoreEl.innerText = score;
+            finalDistanceEl.innerText = distance + " M";
+            finalHighScoreEl.innerText = highScore;
+
+            gameOverScreen.classList.remove('hide');
+        }
+    </script>
+</body>
+</html>

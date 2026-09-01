@@ -1,0 +1,2090 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>PlayNova - Zombie Survival</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#020504;
+    font-family:Arial,sans-serif;
+    touch-action:none;
+}
+
+canvas{
+    display:block;
+    width:100vw;
+    height:100vh;
+}
+
+#hud{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    color:white;
+    z-index:5;
+}
+
+#top{
+    position:absolute;
+    top:14px;
+    left:14px;
+    right:14px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.box{
+    background:rgba(4,9,7,.78);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px;
+    padding:9px 13px;
+    backdrop-filter:blur(7px);
+    box-shadow:0 5px 20px #0008;
+}
+
+#healthOuter{
+    position:absolute;
+    left:15px;
+    bottom:18px;
+    width:230px;
+    height:20px;
+    background:#111;
+    border:2px solid #ddd;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+#health{
+    width:100%;
+    height:100%;
+    background:linear-gradient(90deg,#16a34a,#4ade80);
+}
+
+#ammo{
+    position:absolute;
+    right:18px;
+    bottom:18px;
+    font-size:28px;
+    font-weight:bold;
+}
+
+#reload{
+    position:absolute;
+    right:20px;
+    bottom:62px;
+    color:#facc15;
+    display:none;
+}
+
+#crosshair{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:34px;
+    height:34px;
+    transform:translate(-50%,-50%);
+    opacity:.8;
+}
+
+#crosshair:before,
+#crosshair:after{
+    content:"";
+    position:absolute;
+    background:white;
+}
+
+#crosshair:before{
+    width:2px;
+    height:34px;
+    left:16px;
+}
+
+#crosshair:after{
+    height:2px;
+    width:34px;
+    top:16px;
+}
+
+#controls{
+    position:fixed;
+    inset:0;
+    z-index:10;
+    pointer-events:none;
+}
+
+.btn{
+    position:absolute;
+    pointer-events:auto;
+    border:1px solid #ffffff35;
+    background:#0009;
+    color:white;
+    border-radius:50%;
+    user-select:none;
+}
+
+#shoot{
+    right:24px;
+    bottom:105px;
+    width:90px;
+    height:90px;
+    font-size:18px;
+    border:3px solid #ef4444;
+    background:#450b0bcc;
+}
+
+#reloadBtn{
+    right:31px;
+    bottom:25px;
+    width:65px;
+    height:65px;
+    font-size:12px;
+}
+
+#up{
+    left:83px;
+    bottom:137px;
+    width:58px;
+    height:58px;
+}
+
+#down{
+    left:83px;
+    bottom:22px;
+    width:58px;
+    height:58px;
+}
+
+#left{
+    left:20px;
+    bottom:80px;
+    width:58px;
+    height:58px;
+}
+
+#right{
+    left:146px;
+    bottom:80px;
+    width:58px;
+    height:58px;
+}
+
+.overlay{
+    position:fixed;
+    inset:0;
+    z-index:30;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.82);
+    color:white;
+    text-align:center;
+}
+
+.panel{
+    width:min(92%,470px);
+    padding:34px 25px;
+    border-radius:24px;
+    background:linear-gradient(145deg,#101814,#07100b);
+    border:1px solid #435448;
+    box-shadow:0 25px 80px #000;
+}
+
+.panel h1{
+    font-size:38px;
+    margin-bottom:12px;
+}
+
+.panel p{
+    color:#cbd5e1;
+    margin:8px;
+    line-height:1.5;
+}
+
+.start{
+    margin-top:20px;
+    padding:14px 32px;
+    border:0;
+    border-radius:30px;
+    background:linear-gradient(135deg,#ef4444,#991b1b);
+    color:white;
+    font-size:17px;
+    font-weight:bold;
+}
+
+#damage{
+    position:fixed;
+    inset:0;
+    z-index:20;
+    pointer-events:none;
+    display:none;
+    background:radial-gradient(circle,transparent 30%,#ff000055);
+}
+
+@media(min-width:800px){
+    #controls{
+        display:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="hud">
+
+    <div id="top">
+        <div class="box">
+            🧟 Kills: <b id="kills">0</b>
+        </div>
+
+        <div class="box">
+            🌊 Wave: <b id="wave">1</b>
+        </div>
+
+        <div class="box">
+            🏆 Score: <b id="score">0</b>
+        </div>
+    </div>
+
+    <div id="healthOuter">
+        <div id="health"></div>
+    </div>
+
+    <div id="ammo">12 / 72</div>
+    <div id="reload">RELOADING...</div>
+
+    <div id="crosshair"></div>
+
+</div>
+
+<div id="damage"></div>
+
+<div id="controls">
+
+    <button class="btn" id="up">▲</button>
+    <button class="btn" id="down">▼</button>
+    <button class="btn" id="left">◀️</button>
+    <button class="btn" id="right">▶️</button>
+
+    <button class="btn" id="shoot">FIRE</button>
+    <button class="btn" id="reloadBtn">RELOAD</button>
+
+</div>
+
+<div class="overlay" id="start">
+
+    <div class="panel">
+
+        <h1>🧟 ZOMBIE SURVIVAL</h1>
+
+        <p>
+            Survive the night. Eliminate the zombies.
+        </p>
+
+        <p>
+            PC: <b>W A S D</b> to move • Mouse to aim • Click to shoot
+        </p>
+
+        <p>
+            Mobile: movement buttons + FIRE
+        </p>
+
+        <button class="start" id="startBtn">
+            ▶️ START SURVIVAL
+        </button>
+
+    </div>
+
+</div>
+
+<div class="overlay" id="gameover" style="display:none">
+
+    <div class="panel">
+
+        <h1>☠️ YOU DIED</h1>
+
+        <p>Kills: <b id="endKills">0</b></p>
+        <p>Score: <b id="endScore">0</b></p>
+        <p>Wave reached: <b id="endWave">1</b></p>
+
+        <button class="start" id="again">
+            🔄 PLAY AGAIN
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+let W=0,H=0;
+let DPR=Math.min(devicePixelRatio||1,2);
+
+function resize(){
+    W=innerWidth;
+    H=innerHeight;
+
+    canvas.width=W*DPR;
+    canvas.height=H*DPR;
+
+    canvas.style.width=W+"px";
+    canvas.style.height=H+"px";
+
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+
+addEventListener("resize",resize);
+resize();
+
+
+/* =========================
+   AUDIO
+========================= */
+
+let audio=null;
+
+function audioInit(){
+
+    if(audio)return;
+
+    audio=new(window.AudioContext||window.webkitAudioContext)();
+
+}
+
+function sound(type){
+
+    if(!audio)return;
+
+    const o=audio.createOscillator();
+    const g=audio.createGain();
+
+    o.connect(g);
+    g.connect(audio.destination);
+
+    if(type==="shot"){
+
+        o.type="square";
+        o.frequency.setValueAtTime(170,audio.currentTime);
+        o.frequency.exponentialRampToValueAtTime(
+            55,audio.currentTime+.12
+        );
+
+        g.gain.setValueAtTime(.13,audio.currentTime);
+        g.gain.exponentialRampToValueAtTime(
+            .001,audio.currentTime+.12
+        );
+
+        o.start();
+        o.stop(audio.currentTime+.12);
+
+    }
+
+    if(type==="hit"){
+
+        o.type="sawtooth";
+        o.frequency.value=70;
+
+        g.gain.setValueAtTime(.07,audio.currentTime);
+        g.gain.exponentialRampToValueAtTime(
+            .001,audio.currentTime+.12
+        );
+
+        o.start();
+        o.stop(audio.currentTime+.12);
+
+    }
+
+    if(type==="reload"){
+
+        o.type="sine";
+        o.frequency.setValueAtTime(420,audio.currentTime);
+        o.frequency.setValueAtTime(650,audio.currentTime+.12);
+
+        g.gain.setValueAtTime(.06,audio.currentTime);
+        g.gain.exponentialRampToValueAtTime(
+            .001,audio.currentTime+.25
+        );
+
+        o.start();
+        o.stop(audio.currentTime+.25);
+
+    }
+
+}
+
+
+/* =========================
+   WORLD
+========================= */
+
+const world={
+    width:2600,
+    height:1900
+};
+
+const camera={
+    x:0,
+    y:0
+};
+
+
+/* =========================
+   PLAYER
+========================= */
+
+const player={
+    x:1300,
+    y:950,
+    r:20,
+    speed:3.2,
+    health:100,
+    angle:0,
+    shooting:false,
+    recoil:0,
+    ammo:12,
+    reserve:72,
+    reloading:false
+};
+
+
+/* =========================
+   GAME
+========================= */
+
+let running=false;
+let kills=0;
+let score=0;
+let wave=1;
+let zombies=[];
+let bullets=[];
+let particles=[];
+let buildings=[];
+let pickups=[];
+
+let keys={};
+
+let mouse={
+    x:W/2,
+    y:H/2,
+    down:false
+};
+
+let last=0;
+let spawnTimer=0;
+let waveKills=0;
+
+
+/* =========================
+   BUILDINGS
+========================= */
+
+function createBuildings(){
+
+    buildings=[];
+
+    for(let i=0;i<34;i++){
+
+        const b={
+            x:Math.random()*(world.width-220)+80,
+            y:Math.random()*(world.height-220)+80,
+            w:100+Math.random()*100,
+            h:80+Math.random()*110
+        };
+
+        if(
+            Math.hypot(
+                b.x-player.x,
+                b.y-player.y
+            )<300
+        ){
+            i--;
+            continue;
+        }
+
+        buildings.push(b);
+    }
+
+}
+
+
+/* =========================
+   ZOMBIES
+========================= */
+
+function spawnZombie(){
+
+    const side=Math.floor(Math.random()*4);
+
+    let x,y;
+
+    if(side===0){
+        x=Math.random()*world.width;
+        y=-60;
+    }
+
+    if(side===1){
+        x=world.width+60;
+        y=Math.random()*world.height;
+    }
+
+    if(side===2){
+        x=Math.random()*world.width;
+        y=world.height+60;
+    }
+
+    if(side===3){
+        x=-60;
+        y=Math.random()*world.height;
+    }
+
+    const type=Math.random();
+
+    zombies.push({
+
+        x:x,
+        y:y,
+
+        r:type<.15?25:19,
+
+        speed:
+            type<.15
+            ?1.05+wave*.025
+            :1.35+Math.random()*.45+wave*.035,
+
+        health:
+            type<.15
+            ?3
+            :1,
+
+        type:type<.15?"brute":"normal",
+
+        attack:0
+
+    });
+
+}
+
+
+/* =========================
+   BULLET
+========================= */
+
+function shoot(){
+
+    if(!running)return;
+
+    player.shooting = true;
+
+    player.recoil = 7;
+
+setTimeout(()=>{
+    player.shooting = false;
+},70);
+
+    if(player.reloading)return;
+
+    if(player.ammo<=0){
+
+        reload();
+        return;
+
+    }
+
+    player.ammo--;
+
+    sound("shot");
+
+    const a=player.angle;
+
+    bullets.push({
+
+        x:player.x+Math.cos(a)*25,
+        y:player.y+Math.sin(a)*25,
+
+        vx:Math.cos(a)*12,
+        vy:Math.sin(a)*12,
+
+        life:70
+
+    });
+
+    for(let i=0;i<5;i++){
+
+        particles.push({
+
+            x:player.x+Math.cos(a)*28,
+            y:player.y+Math.sin(a)*28,
+
+            vx:(Math.random()-.5)*3,
+            vy:(Math.random()-.5)*3,
+
+            life:12,
+            color:"#ffd166"
+
+        });
+
+    }
+
+}
+
+
+/* =========================
+   RELOAD
+========================= */
+
+function reload(){
+
+    if(player.reloading)return;
+    if(player.ammo>=12)return;
+    if(player.reserve<=0)return;
+
+    player.reloading=true;
+
+    document.getElementById("reload").style.display="block";
+
+    sound("reload");
+
+    setTimeout(()=>{
+
+        const need=12-player.ammo;
+
+        const amount=Math.min(
+            need,
+            player.reserve
+        );
+
+        player.ammo+=amount;
+        player.reserve-=amount;
+
+        player.reloading=false;
+
+        document.getElementById("reload").style.display="none";
+
+    },900);
+
+}
+
+
+/* =========================
+   PARTICLES
+========================= */
+
+function particle(x,y,color="#dc2626"){
+
+    for(let i=0;i<8;i++){
+
+        particles.push({
+
+            x:x,
+            y:y,
+
+            vx:(Math.random()-.5)*4,
+            vy:(Math.random()-.5)*4,
+
+            life:25+Math.random()*15,
+
+            color:color
+
+        });
+
+    }
+
+}
+
+
+/* =========================
+   UPDATE
+========================= */
+
+function update(dt){
+
+    player.recoil *= Math.pow(0.75, dt);
+
+if(player.recoil < 0.1){
+    player.recoil = 0;
+}
+
+    /* PLAYER */
+
+    let dx=0;
+    let dy=0;
+
+    if(keys.w||keys.ArrowUp)dy-=1;
+    if(keys.s||keys.ArrowDown)dy+=1;
+    if(keys.a||keys.ArrowLeft)dx-=1;
+    if(keys.d||keys.ArrowRight)dx+=1;
+
+    if(dx||dy){
+
+        const len=Math.hypot(dx,dy);
+
+        dx/=len;
+        dy/=len;
+
+        player.x+=dx*player.speed*dt;
+        player.y+=dy*player.speed*dt;
+
+    }
+
+    player.x=Math.max(35,Math.min(world.width-35,player.x));
+    player.y=Math.max(35,Math.min(world.height-35,player.y));
+
+
+    /* AIM */
+
+    player.angle=Math.atan2(
+        mouse.y-H/2,
+        mouse.x-W/2
+    );
+
+
+    /* SHOOT */
+
+    if(mouse.down){
+        shoot();
+        mouse.down=false;
+    }
+
+
+    /* BULLETS */
+
+    bullets.forEach((b,i)=>{
+
+        b.x+=b.vx*dt;
+        b.y+=b.vy*dt;
+        b.life-=dt;
+
+        let remove=b.life<=0;
+
+        zombies.forEach((z,zi)=>{
+
+            if(remove)return;
+
+            if(
+                Math.hypot(
+                    b.x-z.x,
+                    b.y-z.y
+                )<z.r
+            ){
+
+                z.health--;
+
+                particle(b.x,b.y);
+
+                sound("hit");
+
+                remove=true;
+
+                if(z.health<=0){
+
+                    particle(z.x,z.y);
+
+                    zombies.splice(zi,1);
+
+                    kills++;
+                    score+=z.type==="brute"?300:100;
+
+                    waveKills++;
+
+                    if(
+                        waveKills>=
+                        8+wave*4
+                    ){
+
+                        wave++;
+                        waveKills=0;
+
+                    }
+
+                }
+
+            }
+
+        });
+
+        if(remove)
+            bullets.splice(i,1);
+
+    });
+
+
+    /* ZOMBIES */
+
+    zombies.forEach((z,i)=>{
+
+        const dx=player.x-z.x;
+        const dy=player.y-z.y;
+
+        const d=Math.hypot(dx,dy);
+
+        if(d>player.r+z.r){
+
+            z.x+=(dx/d)*z.speed*dt;
+            z.y+=(dy/d)*z.speed*dt;
+
+        }else{
+
+            z.attack+=dt;
+
+            if(z.attack>45){
+
+                player.health-=
+                    z.type==="brute"?9:5;
+
+                z.attack=0;
+
+                particle(
+                    player.x,
+                    player.y,
+                    "#ef4444"
+                );
+
+                damageFlash();
+
+            }
+
+        }
+
+    });
+
+
+    /* SPAWN */
+
+    spawnTimer+=dt;
+
+    const maxZombies=
+        Math.min(28,6+wave*3);
+
+    if(
+        spawnTimer>
+        Math.max(18,55-wave*2)
+        &&
+        zombies.length<maxZombies
+    ){
+
+        spawnZombie();
+
+        spawnTimer=0;
+
+    }
+
+
+    /* PARTICLES */
+
+    particles.forEach((p,i)=>{
+
+        p.x+=p.vx*dt;
+        p.y+=p.vy*dt;
+        p.life-=dt;
+
+        if(p.life<=0)
+            particles.splice(i,1);
+
+    });
+
+
+    /* CAMERA */
+
+    camera.x=
+        player.x-W/2;
+
+    camera.y=
+        player.y-H/2;
+
+    camera.x=
+        Math.max(
+            0,
+            Math.min(
+                world.width-W,
+                camera.x
+            )
+        );
+
+    camera.y=
+        Math.max(
+            0,
+            Math.min(
+                world.height-H,
+                camera.y
+            )
+        );
+
+
+    if(player.health<=0)
+        endGame();
+
+
+    updateHUD();
+
+}
+
+
+/* =========================
+   DRAW
+========================= */
+
+function draw(){
+
+    ctx.clearRect(0,0,W,H);
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+
+    /* GROUND */
+
+    ctx.fillStyle="#18251b";
+
+    ctx.fillRect(
+        0,0,
+        world.width,
+        world.height
+    );
+
+
+    /* GROUND TEXTURE */
+
+    for(let x=0;x<world.width;x+=80){
+
+        for(let y=0;y<world.height;y+=80){
+
+            ctx.fillStyle=
+                ((x+y)/80)%2===0
+                ?"#1b2b20"
+                :"#19271d";
+
+            ctx.fillRect(
+                x,y,80,80
+            );
+
+        }
+
+    }
+
+
+    /* ROADS */
+
+    ctx.fillStyle="#252a27";
+
+    ctx.fillRect(
+        world.width/2-120,
+        0,
+        240,
+        world.height
+    );
+
+    ctx.fillRect(
+        0,
+        world.height/2-110,
+        world.width,
+        220
+    );
+
+
+    /* ROAD MARKINGS */
+
+    ctx.strokeStyle="#d1d5db";
+    ctx.lineWidth=4;
+    ctx.setLineDash([35,30]);
+
+    ctx.beginPath();
+    ctx.moveTo(world.width/2,0);
+    ctx.lineTo(world.width/2,world.height);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0,world.height/2);
+    ctx.lineTo(world.width,world.height/2);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+
+    /* BUILDINGS */
+
+    buildings.forEach(b=>{
+
+        ctx.fillStyle="#080d0a";
+
+        ctx.fillRect(
+            b.x+8,
+            b.y+10,
+            b.w,
+            b.h
+        );
+
+        const grad=
+            ctx.createLinearGradient(
+                b.x,
+                b.y,
+                b.x+b.w,
+                b.y+b.h
+            );
+
+        grad.addColorStop(0,"#46534b");
+        grad.addColorStop(1,"#202923");
+
+        ctx.fillStyle=grad;
+
+        ctx.fillRect(
+            b.x,
+            b.y,
+            b.w,
+            b.h
+        );
+
+        ctx.strokeStyle="#718078";
+        ctx.lineWidth=2;
+
+        ctx.strokeRect(
+            b.x,
+            b.y,
+            b.w,
+            b.h
+        );
+
+        for(
+            let xx=b.x+15;
+            xx<b.x+b.w-10;
+            xx+=28
+        ){
+
+            for(
+                let yy=b.y+15;
+                yy<b.y+b.h-10;
+                yy+=30
+            ){
+
+                ctx.fillStyle=
+                    Math.random()>.45
+                    ?"rgba(250,204,21,.65)"
+                    :"rgba(10,20,15,.7)";
+
+                ctx.fillRect(
+                    xx,yy,13,17
+                );
+
+            }
+
+        }
+
+    });
+
+
+    /* BULLETS */
+
+    bullets.forEach(b=>{
+
+        ctx.fillStyle="#fde68a";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            b.x,
+            b.y,
+            4,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+    });
+
+
+    /* ZOMBIES */
+
+    zombies.forEach(z=>drawZombie(z));
+
+
+    /* PLAYER */
+
+    drawPlayer();
+
+
+    /* PARTICLES */
+
+    particles.forEach(p=>{
+
+        ctx.globalAlpha=
+            Math.max(0,p.life/35);
+
+        ctx.fillStyle=p.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            3,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.globalAlpha=1;
+
+    });
+
+
+    ctx.restore();
+
+
+    /* DARKNESS / FLASHLIGHT */
+
+    drawLighting();
+
+}
+
+
+/* =========================
+   PLAYER DRAW
+========================= */
+
+function drawPlayer(){
+
+    ctx.save();
+
+    ctx.translate(player.x,player.y);
+    ctx.rotate(player.angle);
+
+    /* SHADOW */
+    ctx.fillStyle="rgba(0,0,0,.55)";
+    ctx.beginPath();
+    ctx.ellipse(0,24,27,11,0,0,Math.PI*2);
+    ctx.fill();
+
+    /* BACKPACK */
+    ctx.fillStyle="#17251b";
+    ctx.beginPath();
+    ctx.roundRect(-20,-2,12,35,6);
+    ctx.fill();
+
+    /* LEGS */
+    ctx.strokeStyle="#101712";
+    ctx.lineWidth=10;
+    ctx.lineCap="round";
+
+    ctx.beginPath();
+    ctx.moveTo(-7,24);
+    ctx.lineTo(-11,43);
+
+    ctx.moveTo(7,24);
+    ctx.lineTo(11,43);
+    ctx.stroke();
+
+    /* BOOTS */
+    ctx.strokeStyle="#080b09";
+    ctx.lineWidth=7;
+
+    ctx.beginPath();
+    ctx.moveTo(-12,43);
+    ctx.lineTo(-18,44);
+
+    ctx.moveTo(12,43);
+    ctx.lineTo(18,44);
+    ctx.stroke();
+
+    /* BODY ARMOUR */
+    const armour=ctx.createLinearGradient(
+        -16,-5,
+        16,32
+    );
+
+    armour.addColorStop(0,"#526b56");
+    armour.addColorStop(.45,"#263b2b");
+    armour.addColorStop(1,"#111d15");
+
+    ctx.fillStyle=armour;
+
+    ctx.beginPath();
+    ctx.roundRect(-15,-5,30,38,9);
+    ctx.fill();
+
+    /* ARMOUR PLATES */
+    ctx.strokeStyle="#708472";
+    ctx.lineWidth=1.5;
+
+    ctx.beginPath();
+    ctx.roundRect(-10,2,20,18,5);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0,2);
+    ctx.lineTo(0,20);
+    ctx.stroke();
+
+    /* BELT */
+    ctx.fillStyle="#0b120d";
+    ctx.fillRect(-15,21,30,5);
+
+    /* BELT BUCKLE */
+    ctx.fillStyle="#b9a35c";
+    ctx.fillRect(-3,21,6,5);
+
+    /* NECK */
+    ctx.fillStyle="#a9684a";
+    ctx.fillRect(-6,-10,12,9);
+
+    /* HEAD */
+    const skin=ctx.createRadialGradient(
+        -4,-20,2,
+        0,-17,14
+    );
+
+    skin.addColorStop(0,"#d69a70");
+    skin.addColorStop(1,"#805039");
+
+    ctx.fillStyle=skin;
+
+    ctx.beginPath();
+    ctx.arc(0,-18,13,0,Math.PI*2);
+    ctx.fill();
+
+    /* EARS */
+    ctx.fillStyle="#a9674b";
+
+    ctx.beginPath();
+    ctx.arc(-13,-18,4,0,Math.PI*2);
+    ctx.arc(13,-18,4,0,Math.PI*2);
+    ctx.fill();
+
+    /* HAIR */
+    ctx.fillStyle="#15110e";
+
+    ctx.beginPath();
+    ctx.arc(
+        0,-23,
+        13,
+        Math.PI,
+        Math.PI*2
+    );
+    ctx.fill();
+
+    /* HELMET */
+    ctx.fillStyle="#26382b";
+
+    ctx.beginPath();
+    ctx.arc(
+        0,-22,
+        15,
+        Math.PI,
+        Math.PI*2
+    );
+    ctx.fill();
+
+    /* HELMET FRONT */
+    ctx.fillStyle="#405744";
+
+    ctx.fillRect(
+        -14,-23,
+        28,5
+    );
+
+    /* HELMET STRAP */
+    ctx.strokeStyle="#111812";
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+    ctx.moveTo(-10,-13);
+    ctx.lineTo(10,-13);
+    ctx.stroke();
+
+    /* EYES */
+    ctx.fillStyle="#15100d";
+
+    ctx.beginPath();
+    ctx.arc(-5,-18,1.7,0,Math.PI*2);
+    ctx.arc(5,-18,1.7,0,Math.PI*2);
+    ctx.fill();
+
+    /* FACE / BEARD */
+    ctx.fillStyle="rgba(35,25,20,.55)";
+
+    ctx.beginPath();
+    ctx.arc(
+        0,-12,
+        7,
+        0,
+        Math.PI
+    );
+    ctx.fill();
+
+    /* LEFT ARM */
+    ctx.strokeStyle="#263c2c";
+    ctx.lineWidth=9;
+
+    ctx.beginPath();
+    ctx.moveTo(-10,1);
+    ctx.lineTo(-21,11);
+    ctx.stroke();
+
+    /* RIGHT ARM */
+    ctx.beginPath();
+    ctx.moveTo(10,1);
+    ctx.lineTo(17,8);
+    ctx.stroke();
+
+    /* GLOVES */
+    ctx.fillStyle="#101713";
+
+    ctx.beginPath();
+    ctx.arc(-22,12,5,0,Math.PI*2);
+    ctx.arc(18,9,5,0,Math.PI*2);
+    ctx.fill();
+
+    /* GUN */
+    ctx.fillStyle="#090b0c";
+
+    /* main rifle */
+    ctx.fillRect(
+        8,-1,
+        48,7
+    );
+
+    /* upper rail */
+    ctx.fillStyle="#252b2d";
+
+    ctx.fillRect(
+        18,-5,
+        28,4
+    );
+
+    /* magazine */
+    ctx.fillStyle="#111516";
+
+    ctx.beginPath();
+    ctx.moveTo(24,6);
+    ctx.lineTo(31,6);
+    ctx.lineTo(28,18);
+    ctx.lineTo(21,16);
+    ctx.closePath();
+    ctx.fill();
+
+    /* grip */
+    ctx.fillStyle="#151a18";
+
+    ctx.beginPath();
+    ctx.moveTo(13,5);
+    ctx.lineTo(20,5);
+    ctx.lineTo(18,17);
+    ctx.lineTo(11,14);
+    ctx.closePath();
+    ctx.fill();
+
+    /* barrel */
+    ctx.fillStyle="#050606";
+
+    ctx.fillRect(
+        51,-2,
+        14,5
+    );
+
+/* GUN RECOIL */
+
+ctx.save();
+
+ctx.translate(-player.recoil,0);
+
+ctx.fillStyle="#080a0b";
+
+ctx.fillRect(
+    8,-1,
+    48,7
+);
+
+ctx.fillStyle="#252b2d";
+
+ctx.fillRect(
+    18,-5,
+    28,4
+);
+
+ctx.restore();
+
+
+/* MUZZLE FLASH */
+
+if(player.shooting){
+
+    ctx.save();
+
+    ctx.translate(70,0);
+
+    ctx.fillStyle="#fff7a8";
+
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(16,-10);
+    ctx.lineTo(11,0);
+    ctx.lineTo(18,9);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle="#ff9f1c";
+
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(11,-6);
+    ctx.lineTo(8,0);
+    ctx.lineTo(12,6);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+}
+
+    /* muzzle */
+    ctx.fillStyle="#ffd166";
+
+    ctx.fillRect(
+        45,-7,
+        7,13
+    );
+
+    /* gun sight */
+    ctx.fillStyle="#64706a";
+
+    ctx.fillRect(
+        39,-7,
+        7,3
+    );
+
+    /* MUZZLE FLASH */
+    if(player.shooting){
+
+        ctx.fillStyle="#ffd166";
+
+        ctx.beginPath();
+
+        ctx.moveTo(70,0);
+        ctx.lineTo(82,-7);
+        ctx.lineTo(77,0);
+        ctx.lineTo(84,7);
+        ctx.lineTo(70,3);
+
+        ctx.closePath();
+
+        ctx.fill();
+
+    }
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   ZOMBIE DRAW
+========================= */
+
+function drawZombie(z){
+
+    ctx.save();
+
+    ctx.translate(z.x,z.y);
+
+    /* WALKING ANIMATION */
+    const walk = Math.sin(performance.now()/120 + z.x) * 3;
+
+    /* ATTACK ANIMATION */
+    const attacking = z.attack > 20;
+    const attackMove = attacking
+        ? Math.sin(performance.now()/70) * 7
+        : 0;
+
+    /* SHADOW */
+    ctx.fillStyle="rgba(0,0,0,.55)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        22,
+        z.r+8,
+        8,
+        0,0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /* LEGS */
+    ctx.strokeStyle=
+        z.type==="brute"
+        ? "#3f5140"
+        : "#283a2b";
+
+    ctx.lineWidth=
+        z.type==="brute"
+        ? 10
+        : 7;
+
+    ctx.lineCap="round";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-7,15);
+    ctx.lineTo(-10,32+walk);
+
+    ctx.moveTo(7,15);
+    ctx.lineTo(10,32-walk);
+
+    ctx.stroke();
+
+
+    /* BODY */
+    const body=ctx.createLinearGradient(
+        -z.r,-5,
+        z.r,25
+    );
+
+    body.addColorStop(
+        0,
+        z.type==="brute"
+        ? "#637a5e"
+        : "#4e674f"
+    );
+
+    body.addColorStop(
+        1,
+        "#17241a"
+    );
+
+    ctx.fillStyle=body;
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        -z.r*.75,
+        -5,
+        z.r*1.5,
+        z.r*1.7,
+        8
+    );
+
+    ctx.fill();
+
+
+    /* CLOTH DETAILS */
+    ctx.strokeStyle="#788a73";
+    ctx.lineWidth=1.5;
+
+    ctx.beginPath();
+
+    ctx.moveTo(-z.r*.55,5);
+    ctx.lineTo(z.r*.55,5);
+
+    ctx.moveTo(0,5);
+    ctx.lineTo(0,25);
+
+    ctx.stroke();
+
+
+    /* LEFT ARM */
+    ctx.strokeStyle=
+        z.type==="brute"
+        ? "#657d60"
+        : "#718b6c";
+
+    ctx.lineWidth=
+        z.type==="brute"
+        ? 9
+        : 7;
+
+    ctx.beginPath();
+
+    ctx.moveTo(-10,0);
+
+    ctx.lineTo(
+        -z.r-6,
+        9+attackMove
+    );
+
+    ctx.stroke();
+
+
+    /* RIGHT ARM */
+    ctx.beginPath();
+
+    ctx.moveTo(10,0);
+
+    ctx.lineTo(
+        z.r+6,
+        8+attackMove
+    );
+
+    ctx.stroke();
+
+
+    /* HANDS */
+    ctx.fillStyle="#6f886b";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -z.r-6,
+        9+attackMove,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.arc(
+        z.r+6,
+        8+attackMove,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /* HEAD */
+    ctx.fillStyle=
+        z.type==="brute"
+        ? "#718a68"
+        : "#829d78";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -z.r*.85,
+        z.r*.65,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /* EAR */
+    ctx.fillStyle="#60765b";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -z.r*.65,
+        -z.r*.82,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.arc(
+        z.r*.65,
+        -z.r*.82,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /* EYES */
+    ctx.fillStyle="#ff2929";
+
+    ctx.shadowColor="#ff0000";
+    ctx.shadowBlur=8;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -z.r*.22,
+        -z.r*.92,
+        3,
+        0,
+        Math.PI*2
+    );
+
+    ctx.arc(
+        z.r*.22,
+        -z.r*.92,
+        3,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.shadowBlur=0;
+
+
+    /* MOUTH */
+    ctx.strokeStyle="#1b0b0b";
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -z.r*.55,
+        z.r*.25,
+        0,
+        Math.PI
+    );
+
+    ctx.stroke();
+
+
+    /* BRUTE SHOULDERS */
+    if(z.type==="brute"){
+
+        ctx.fillStyle="#26392b";
+
+        ctx.fillRect(
+            -z.r-5,
+            -7,
+            10,
+            15
+        );
+
+        ctx.fillRect(
+            z.r-5,
+            -7,
+            10,
+            15
+        );
+
+    }
+
+
+    /* BRUTE HEALTH BAR */
+    if(z.type==="brute"){
+
+        ctx.fillStyle="#090909";
+
+        ctx.fillRect(
+            -22,
+            -45,
+            44,
+            5
+        );
+
+        ctx.fillStyle="#ef4444";
+
+        ctx.fillRect(
+            -22,
+            -45,
+            44*(z.health/3),
+            5
+        );
+
+    }
+
+
+    /* ATTACK EFFECT */
+    if(attacking){
+
+        ctx.strokeStyle="rgba(255,70,70,.7)";
+        ctx.lineWidth=2;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            0,
+            z.r+10,
+            -0.8,
+            0.8
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   LIGHTING
+========================= */
+
+function drawLighting(){
+
+    const px=W/2;
+    const py=H/2;
+
+    const gradient=
+        ctx.createRadialGradient(
+            px,py,80,
+            px,py,430
+        );
+
+    gradient.addColorStop(
+        0,
+        "rgba(0,0,0,0)"
+    );
+
+    gradient.addColorStop(
+        .55,
+        "rgba(0,0,0,.18)"
+    );
+
+    gradient.addColorStop(
+        1,
+        "rgba(0,0,0,.88)"
+    );
+
+    ctx.fillStyle=gradient;
+
+    ctx.fillRect(
+        0,0,W,H
+    );
+
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD(){
+
+    document.getElementById("kills").textContent=kills;
+    document.getElementById("score").textContent=score;
+    document.getElementById("wave").textContent=wave;
+
+    document.getElementById("health").style.width=
+        Math.max(0,player.health)+"%";
+
+    document.getElementById("ammo").textContent=
+        player.ammo+" / "+player.reserve;
+
+}
+
+
+/* =========================
+   DAMAGE FLASH
+========================= */
+
+function damageFlash(){
+
+    const d=document.getElementById("damage");
+
+    d.style.display="block";
+
+    setTimeout(()=>{
+        d.style.display="none";
+    },100);
+
+}
+
+
+/* =========================
+   GAME START
+========================= */
+
+document.getElementById("startBtn")
+.onclick=startGame;
+
+document.getElementById("again")
+.onclick=startGame;
+
+function startGame(){
+
+    audioInit();
+
+    if(audio.state==="suspended")
+        audio.resume();
+
+    player.x=1300;
+    player.y=950;
+    player.health=100;
+    player.ammo=12;
+    player.reserve=72;
+    player.reloading=false;
+
+    kills=0;
+    score=0;
+    wave=1;
+    waveKills=0;
+
+    zombies=[];
+    bullets=[];
+    particles=[];
+
+    createBuildings();
+
+    running=true;
+
+    document.getElementById("start").style.display="none";
+    document.getElementById("gameover").style.display="none";
+
+    last=performance.now();
+
+    requestAnimationFrame(loop);
+
+}
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+function endGame(){
+
+    running=false;
+
+    document.getElementById("endKills").textContent=kills;
+    document.getElementById("endScore").textContent=score;
+    document.getElementById("endWave").textContent=wave;
+
+    document.getElementById("gameover").style.display="flex";
+
+}
+
+
+/* =========================
+   LOOP
+========================= */
+
+function loop(time){
+
+    if(!running)return;
+
+    const dt=Math.min(
+        (time-last)/16.67,
+        2
+    );
+
+    last=time;
+
+    update(dt);
+    draw();
+
+    requestAnimationFrame(loop);
+
+}
+
+
+/* =========================
+   KEYBOARD
+========================= */
+
+addEventListener("keydown",e=>{
+
+    keys[e.key]=true;
+
+    if(e.key==="r")
+        reload();
+
+});
+
+addEventListener("keyup",e=>{
+
+    keys[e.key]=false;
+
+});
+
+
+/* =========================
+   MOUSE
+========================= */
+
+canvas.addEventListener("mousemove",e=>{
+
+    mouse.x=e.clientX;
+    mouse.y=e.clientY;
+
+});
+
+canvas.addEventListener("mousedown",e=>{
+
+    if(e.button===0)
+        mouse.down=true;
+
+});
+
+canvas.addEventListener("mouseup",()=>{
+
+    mouse.down=false;
+
+});
+
+
+/* =========================
+   MOBILE MOVEMENT
+========================= */
+
+function hold(id,key){
+
+    const b=document.getElementById(id);
+
+    b.addEventListener("pointerdown",e=>{
+        e.preventDefault();
+        keys[key]=true;
+    });
+
+    ["pointerup","pointercancel","pointerleave"]
+    .forEach(ev=>{
+
+        b.addEventListener(ev,()=>{
+            keys[key]=false;
+        });
+
+    });
+
+}
+
+hold("up","w");
+hold("down","s");
+hold("left","a");
+hold("right","d");
+
+
+/* MOBILE SHOOT */
+
+document.getElementById("shoot")
+.addEventListener("pointerdown",e=>{
+
+    e.preventDefault();
+
+    if(!running)return;
+
+    shoot();
+
+});
+
+
+document.getElementById("reloadBtn")
+.addEventListener("pointerdown",e=>{
+
+    e.preventDefault();
+
+    reload();
+
+});
+
+</script>
+
+</body>
+</html>

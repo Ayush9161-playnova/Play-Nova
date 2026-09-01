@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PlayNova - Bike Racing</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#06101b;
+    font-family:Arial,sans-serif;
+    touch-action:none;
+}
+
+#game{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    background:#72c9ed;
+}
+
+/* SKY */
+#sky{
+    position:absolute;
+    inset:0 0 43% 0;
+    background:
+        linear-gradient(#1596df 0%,#8bd8f5 65%,#d8f6ff 100%);
+}
+
+#sun{
+    position:absolute;
+    width:78px;
+    height:78px;
+    right:10%;
+    top:7%;
+    border-radius:50%;
+    background:#ffe978;
+    box-shadow:0 0 45px #fff5a3;
+}
+
+.cloud{
+    position:absolute;
+    width:120px;
+    height:35px;
+    border-radius:50px;
+    background:rgba(255,255,255,.82);
+}
+
+.cloud:before,.cloud:after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    background:inherit;
+}
+
+.cloud:before{
+    width:52px;
+    height:52px;
+    left:18px;
+    bottom:5px;
+}
+
+.cloud:after{
+    width:62px;
+    height:62px;
+    right:12px;
+    bottom:2px;
+}
+
+#cloud1{left:7%;top:13%}
+#cloud2{right:13%;top:23%;transform:scale(.7)}
+
+/* TERRAIN */
+#terrain{
+    position:absolute;
+    inset:43% 0 0;
+    background:
+        radial-gradient(circle at 15% 30%,#397d39 0 3px,transparent 4px),
+        radial-gradient(circle at 72% 60%,#316d32 0 4px,transparent 5px),
+        linear-gradient(#347a38,#173e20);
+}
+
+/* ROAD */
+#road{
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:min(620px,88vw);
+    background:
+        linear-gradient(
+            90deg,
+            #12161b 0%,
+            #343a42 3%,
+            #252a30 7%,
+            #252a30 93%,
+            #343a42 97%,
+            #12161b 100%
+        );
+    border-left:8px solid #e5e7eb;
+    border-right:8px solid #e5e7eb;
+    box-shadow:0 0 40px rgba(0,0,0,.75);
+    overflow:hidden;
+}
+
+/* ROAD TEXTURE */
+#road:after{
+    content:"";
+    position:absolute;
+    inset:0;
+    opacity:.12;
+    background:
+        repeating-linear-gradient(
+            0deg,
+            transparent 0 9px,
+            #fff 10px 11px
+        );
+    pointer-events:none;
+}
+
+/* ROAD EDGE */
+.edge{
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:7px;
+    z-index:2;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            white 0 38px,
+            #e63946 38px 76px
+        );
+}
+
+#edgeL{left:0}
+#edgeR{right:0}
+
+/* LANE */
+.lane{
+    position:absolute;
+    top:-180px;
+    width:8px;
+    height:120px;
+    border-radius:5px;
+    background:#f8fafc;
+    z-index:2;
+    box-shadow:0 0 5px rgba(255,255,255,.4);
+}
+
+#lane1{left:33.33%}
+#lane2{left:66.66%}
+
+/* BUILDINGS */
+.building{
+    position:absolute;
+    bottom:15%;
+    z-index:5;
+    width:85px;
+    height:145px;
+    border:4px solid #26313b;
+    background:linear-gradient(90deg,#465563,#75818d);
+    box-shadow:8px 8px 15px rgba(0,0,0,.25);
+}
+
+.building:before{
+    content:"";
+    position:absolute;
+    left:10px;
+    right:10px;
+    top:12px;
+    bottom:12px;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #ffd85c 0 13px,
+            transparent 13px 28px
+        ),
+        repeating-linear-gradient(
+            0deg,
+            #ffd85c 0 13px,
+            transparent 13px 28px
+        );
+}
+
+#building1{left:3%}
+
+#building2{
+    right:3%;
+    height:185px;
+    background:linear-gradient(90deg,#694c43,#927065);
+}
+
+/* TREES */
+.tree{
+    position:absolute;
+    bottom:13%;
+    width:70px;
+    height:120px;
+    z-index:6;
+}
+
+.tree:before{
+    content:"";
+    position:absolute;
+    bottom:0;
+    left:29px;
+    width:13px;
+    height:62px;
+    background:linear-gradient(90deg,#4b2e18,#754522,#3d2414);
+}
+
+.tree:after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:#0b5129;
+    box-shadow:
+        25px 10px 0 #176b34,
+        -20px 18px 0 #125c2e,
+        5px -5px 0 #1d7b3b;
+}
+
+#tree1{left:9%}
+#tree2{right:9%}
+
+/* BIKE */
+#bike{
+    position:absolute;
+    z-index:30;
+    left:50%;
+    bottom:8%;
+    width:92px;
+    height:142px;
+    transform:translateX(-50%);
+    transition:transform .08s;
+    filter:drop-shadow(0 10px 6px rgba(0,0,0,.55));
+}
+
+.wheel{
+    position:absolute;
+    width:31px;
+    height:42px;
+    border:7px solid #080a0d;
+    border-radius:50%;
+    background:
+        radial-gradient(circle,#59616b 0 18%,#111 19% 40%,#252a30 41% 100%);
+}
+
+#wheel1{
+    left:7px;
+    bottom:0;
+}
+
+#wheel2{
+    right:7px;
+    bottom:0;
+}
+
+#frame{
+    position:absolute;
+    left:25px;
+    bottom:32px;
+    width:45px;
+    height:66px;
+    background:
+        linear-gradient(125deg,transparent 38%,#d9163d 39% 65%,transparent 66%);
+}
+
+#tank{
+    position:absolute;
+    left:22px;
+    bottom:70px;
+    width:50px;
+    height:27px;
+    border-radius:18px 18px 8px 8px;
+    background:
+        linear-gradient(145deg,#ff4264,#c40f38 55%,#65091d);
+    box-shadow:
+        inset 5px 4px 8px rgba(255,255,255,.25),
+        0 0 9px rgba(255,30,75,.45);
+}
+
+#seat{
+    position:absolute;
+    left:29px;
+    bottom:91px;
+    width:43px;
+    height:9px;
+    border-radius:8px;
+    background:#080a0d;
+}
+
+#handle{
+    position:absolute;
+    right:2px;
+    top:27px;
+    width:38px;
+    height:7px;
+    border-radius:5px;
+    background:#111;
+    transform:rotate(-13deg);
+}
+
+#head{
+    position:absolute;
+    left:35px;
+    top:6px;
+    width:25px;
+    height:25px;
+    border-radius:50%;
+    background:#d79a69;
+    border:4px solid #101318;
+}
+
+#helmet{
+    position:absolute;
+    left:31px;
+    top:1px;
+    width:34px;
+    height:16px;
+    border-radius:18px 18px 5px 5px;
+    background:linear-gradient(135deg,#111827,#334155);
+    border:2px solid #020617;
+}
+
+#light{
+    position:absolute;
+    left:38px;
+    top:48px;
+    width:15px;
+    height:10px;
+    border-radius:8px;
+    background:#fff5a1;
+    box-shadow:0 0 14px #fff5a1;
+}
+
+/* TRAFFIC */
+.traffic{
+    position:absolute;
+    z-index:22;
+    width:66px;
+    height:112px;
+    border:4px solid #101318;
+    border-radius:13px;
+    box-shadow:0 10px 18px rgba(0,0,0,.5);
+}
+
+.traffic:before{
+    content:"";
+    position:absolute;
+    left:8px;
+    right:8px;
+    top:13px;
+    height:34px;
+    border-radius:6px;
+    background:
+        linear-gradient(
+            #c8f1ff,
+            #52869d
+        );
+    border:2px solid #1d2933;
+}
+
+.traffic:after{
+    content:"";
+    position:absolute;
+    bottom:7px;
+    left:7px;
+    width:10px;
+    height:16px;
+    border-radius:3px;
+    background:#07090c;
+    box-shadow:42px 0 #07090c;
+}
+
+.car-red{
+    background:linear-gradient(90deg,#8d1027,#ed284a,#8d1027);
+}
+
+.car-blue{
+    background:linear-gradient(90deg,#123b91,#2563eb,#123b91);
+}
+
+.car-yellow{
+    background:linear-gradient(90deg,#8a6905,#f1c40f,#8a6905);
+}
+
+.car-black{
+    background:linear-gradient(90deg,#111827,#3b4654,#111827);
+}
+
+/* HUD */
+#hud{
+    position:absolute;
+    z-index:80;
+    top:15px;
+    left:15px;
+    right:15px;
+    display:flex;
+    justify-content:space-between;
+    pointer-events:none;
+}
+
+.hud{
+    padding:11px 17px;
+    border-radius:13px;
+    background:rgba(3,7,18,.72);
+    border:1px solid rgba(255,255,255,.18);
+    backdrop-filter:blur(8px);
+    font-weight:bold;
+}
+
+/* SPEEDOMETER */
+#speedometer{
+    position:absolute;
+    z-index:80;
+    right:20px;
+    bottom:22px;
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    background:
+        radial-gradient(circle,#0b1220 0 56%,#263244 57% 64%,#050a12 65%);
+    border:7px solid #64748b;
+    box-shadow:0 10px 35px rgba(0,0,0,.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+}
+
+#speed{
+    font-size:36px;
+    font-weight:900;
+    color:#38bdf8;
+    text-shadow:0 0 10px rgba(56,189,248,.4);
+}
+
+#speedometer small{
+    color:#cbd5e1;
+    font-weight:bold;
+}
+
+/* CONTROLS */
+#controls{
+    position:absolute;
+    z-index:90;
+    left:20px;
+    bottom:25px;
+    display:flex;
+    gap:12px;
+}
+
+.control{
+    width:73px;
+    height:58px;
+    border:1px solid #64748b;
+    border-radius:15px;
+    background:rgba(0,0,0,.72);
+    color:white;
+    font-size:27px;
+    font-weight:bold;
+}
+
+.control:active{
+    background:#2563eb;
+    transform:scale(.93);
+}
+
+/* OVERLAY */
+.overlay{
+    position:absolute;
+    z-index:150;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(2,6,23,.84);
+    text-align:center;
+}
+
+.panel{
+    width:min(92%,440px);
+    padding:38px 28px;
+    border-radius:26px;
+    background:
+        linear-gradient(145deg,#111827,#0b1220);
+    border:1px solid #334155;
+    box-shadow:0 25px 80px #000;
+}
+
+.panel h1{
+    font-size:40px;
+    margin-bottom:12px;
+}
+
+.panel p{
+    color:#cbd5e1;
+    margin:9px 0;
+    line-height:1.5;
+}
+
+.actionBtn{
+    margin-top:20px;
+    border:0;
+    padding:15px 31px;
+    border-radius:30px;
+    background:linear-gradient(135deg,#38bdf8,#2563eb);
+    color:white;
+    font-size:17px;
+    font-weight:bold;
+}
+
+#gameOver{
+    display:none;
+}
+
+/* MOBILE */
+@media(max-width:600px){
+
+    #road{width:91vw}
+
+    #speedometer{
+        width:112px;
+        height:112px;
+        right:12px;
+        bottom:16px;
+    }
+
+    #speed{font-size:27px}
+
+    .control{
+        width:64px;
+        height:53px;
+    }
+
+    .building{
+        transform:scale(.7);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<div id="sky"></div>
+<div id="sun"></div>
+
+<div class="cloud" id="cloud1"></div>
+<div class="cloud" id="cloud2"></div>
+
+<div id="terrain"></div>
+
+<div id="road">
+
+<div class="edge" id="edgeL"></div>
+<div class="edge" id="edgeR"></div>
+
+<div class="lane" id="lane1"></div>
+<div class="lane" id="lane2"></div>
+
+<div id="bike">
+
+<div id="helmet"></div>
+<div id="head"></div>
+<div id="handle"></div>
+<div id="light"></div>
+<div id="seat"></div>
+<div id="tank"></div>
+<div id="frame"></div>
+
+<div class="wheel" id="wheel1"></div>
+<div class="wheel" id="wheel2"></div>
+
+</div>
+
+</div>
+
+<div class="building" id="building1"></div>
+<div class="building" id="building2"></div>
+
+<div class="tree" id="tree1"></div>
+<div class="tree" id="tree2"></div>
+
+
+<div id="hud">
+
+<div class="hud">
+🏁 <span id="distance">0</span> m
+</div>
+
+<div class="hud">
+🏆 <span id="score">0</span>
+</div>
+
+</div>
+
+
+<div id="speedometer">
+
+<span id="speed">0</span>
+<small>KM/H</small>
+
+</div>
+
+
+<div id="controls">
+
+<button class="control" id="leftBtn">◀️</button>
+<button class="control" id="rightBtn">▶️</button>
+
+</div>
+
+
+<div class="overlay" id="startScreen">
+
+<div class="panel">
+
+<h1>🏍️ BIKE RACING</h1>
+
+<p>Race through traffic and survive as long as possible.</p>
+
+<p>PC: <b>← →</b></p>
+<p>Mobile: <b>Touch controls</b></p>
+
+<button class="actionBtn" id="startBtn">
+▶️ START RACE
+</button>
+
+</div>
+
+</div>
+
+
+<div class="overlay" id="gameOver">
+
+<div class="panel">
+
+<h1>💥 CRASH!</h1>
+
+<p>Your Score</p>
+
+<h2 id="finalScore">0</h2>
+
+<button class="actionBtn" id="restartBtn">
+🔄 PLAY AGAIN
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   GAME
+========================= */
+
+const bike=document.getElementById("bike");
+const road=document.getElementById("road");
+
+const speedText=document.getElementById("speed");
+const distanceText=document.getElementById("distance");
+const scoreText=document.getElementById("score");
+
+const startScreen=document.getElementById("startScreen");
+const gameOver=document.getElementById("gameOver");
+
+const startBtn=document.getElementById("startBtn");
+const restartBtn=document.getElementById("restartBtn");
+
+const leftBtn=document.getElementById("leftBtn");
+const rightBtn=document.getElementById("rightBtn");
+
+const finalScore=document.getElementById("finalScore");
+
+let playing=false;
+let bikeX=50;
+
+let speed=70;
+let distance=0;
+let score=0;
+
+let left=false;
+let right=false;
+
+let traffic=[];
+let lastTime=0;
+let spawnTimer=0;
+
+
+/* =========================
+   SOUND ENGINE
+========================= */
+
+let audioContext=null;
+let engineOsc=null;
+let engineGain=null;
+
+function initAudio(){
+
+    if(audioContext)return;
+
+    audioContext=
+        new (window.AudioContext ||
+        window.webkitAudioContext)();
+
+    engineOsc=
+        audioContext.createOscillator();
+
+    engineGain=
+        audioContext.createGain();
+
+    engineOsc.type="sawtooth";
+
+    engineOsc.frequency.value=90;
+
+    engineGain.gain.value=.025;
+
+    engineOsc.connect(engineGain);
+    engineGain.connect(audioContext.destination);
+
+    engineOsc.start();
+
+}
+
+
+/* ENGINE PITCH */
+
+function updateEngineSound(){
+
+    if(!audioContext || !engineOsc)return;
+
+    engineOsc.frequency.setTargetAtTime(
+        75 + speed*1.7,
+        audioContext.currentTime,
+        .04
+    );
+
+}
+
+
+/* CRASH SOUND */
+
+function crashSound(){
+
+    if(!audioContext)return;
+
+    const osc=
+        audioContext.createOscillator();
+
+    const gain=
+        audioContext.createGain();
+
+    osc.type="sawtooth";
+
+    osc.frequency.setValueAtTime(
+        130,
+        audioContext.currentTime
+    );
+
+    osc.frequency.exponentialRampToValueAtTime(
+        35,
+        audioContext.currentTime+.45
+    );
+
+    gain.gain.setValueAtTime(
+        .25,
+        audioContext.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        .001,
+        audioContext.currentTime+.45
+    );
+
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+
+    osc.start();
+    osc.stop(audioContext.currentTime+.45);
+
+}
+
+
+/* TRAFFIC PASS SOUND */
+
+function trafficSound(){
+
+    if(!audioContext)return;
+
+    const osc=
+        audioContext.createOscillator();
+
+    const gain=
+        audioContext.createGain();
+
+    osc.type="sine";
+    osc.frequency.value=120;
+
+    gain.gain.setValueAtTime(
+        .035,
+        audioContext.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        .001,
+        audioContext.currentTime+.18
+    );
+
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+
+    osc.start();
+    osc.stop(audioContext.currentTime+.18);
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+startBtn.onclick=startGame;
+restartBtn.onclick=startGame;
+
+function startGame(){
+
+    initAudio();
+
+    if(audioContext.state==="suspended"){
+        audioContext.resume();
+    }
+
+    traffic.forEach(car=>car.remove());
+
+    traffic=[];
+
+    playing=true;
+
+    bikeX=50;
+    speed=70;
+    distance=0;
+    score=0;
+
+    spawnTimer=0;
+    lastTime=0;
+
+    bike.style.left="50%";
+
+    startScreen.style.display="none";
+    gameOver.style.display="none";
+
+    requestAnimationFrame(loop);
+
+}
+
+
+/* =========================
+   KEYBOARD
+========================= */
+
+document.addEventListener("keydown",e=>{
+
+    if(e.key==="ArrowLeft" || e.key==="a")
+        left=true;
+
+    if(e.key==="ArrowRight" || e.key==="d")
+        right=true;
+
+});
+
+document.addEventListener("keyup",e=>{
+
+    if(e.key==="ArrowLeft" || e.key==="a")
+        left=false;
+
+    if(e.key==="ArrowRight" || e.key==="d")
+        right=false;
+
+});
+
+
+/* =========================
+   MOBILE
+========================= */
+
+function setupControl(button,direction){
+
+    button.addEventListener(
+        "pointerdown",
+        e=>{
+
+            e.preventDefault();
+
+            if(direction==="left")
+                left=true;
+            else
+                right=true;
+
+        }
+    );
+
+    ["pointerup","pointercancel","pointerleave"]
+    .forEach(event=>{
+
+        button.addEventListener(
+            event,
+            ()=>{
+
+                if(direction==="left")
+                    left=false;
+                else
+                    right=false;
+
+            }
+        );
+
+    });
+
+}
+
+setupControl(leftBtn,"left");
+setupControl(rightBtn,"right");
+
+
+/* =========================
+   TRAFFIC
+========================= */
+
+function createTraffic(){
+
+    const car=
+        document.createElement("div");
+
+    car.className="traffic";
+
+    const colors=[
+        "car-red",
+        "car-blue",
+        "car-yellow",
+        "car-black"
+    ];
+
+    car.classList.add(
+        colors[
+            Math.floor(
+                Math.random()*colors.length
+            )
+        ]
+    );
+
+    const lanes=[17,50,83];
+
+    car.style.left=
+        lanes[
+            Math.floor(
+                Math.random()*lanes.length
+            )
+        ]+"%";
+
+    car.style.top="-150px";
+
+    road.appendChild(car);
+
+    traffic.push(car);
+
+}
+
+
+/* =========================
+   COLLISION
+========================= */
+
+function hit(a,b){
+
+    const A=a.getBoundingClientRect();
+    const B=b.getBoundingClientRect();
+
+    return !(
+        A.right<B.left ||
+        A.left>B.right ||
+        A.bottom<B.top ||
+        A.top>B.bottom
+    );
+
+}
+
+
+/* =========================
+   LOOP
+========================= */
+
+function loop(time){
+
+    if(!playing)return;
+
+    if(!lastTime)
+        lastTime=time;
+
+    const dt=
+        Math.min(
+            (time-lastTime)/16.67,
+            2
+        );
+
+    lastTime=time;
+
+
+    /* STEERING */
+
+    if(left){
+
+        bikeX-=.9*dt;
+
+        bike.style.transform=
+            "translateX(-50%) rotate(-8deg)";
+
+    }
+    else if(right){
+
+        bikeX+=.9*dt;
+
+        bike.style.transform=
+            "translateX(-50%) rotate(8deg)";
+
+    }
+    else{
+
+        bike.style.transform=
+            "translateX(-50%) rotate(0deg)";
+
+    }
+
+    bikeX=
+        Math.max(
+            12,
+            Math.min(88,bikeX)
+        );
+
+    bike.style.left=
+        bikeX+"%";
+
+
+    /* ACCELERATION */
+
+    if(left || right)
+        speed+=.42*dt;
+    else
+        speed-=.08*dt;
+
+    speed=
+        Math.max(
+            60,
+            Math.min(190,speed)
+        );
+
+
+    updateEngineSound();
+
+
+    const roadSpeed=
+        5+speed/37;
+
+
+    /* ROAD */
+
+    document.querySelectorAll(".lane")
+    .forEach(line=>{
+
+        let y=
+            parseFloat(
+                line.dataset.y || -180
+            );
+
+        y+=roadSpeed*dt;
+
+        if(y>innerHeight)
+            y=-180;
+
+        line.dataset.y=y;
+        line.style.top=y+"px";
+
+    });
+
+
+    /* TRAFFIC SPAWN */
+
+    spawnTimer+=dt;
+
+    const spawnRate=
+        Math.max(
+            24,
+            65-speed*.15
+        );
+
+    if(spawnTimer>spawnRate){
+
+        createTraffic();
+
+        spawnTimer=0;
+
+    }
+
+
+    /* TRAFFIC MOVE */
+
+    traffic.forEach((car,index)=>{
+
+        let y=
+            parseFloat(
+                car.dataset.y || -150
+            );
+
+        y+=roadSpeed*dt;
+
+        car.dataset.y=y;
+        car.style.top=y+"px";
+
+
+        if(hit(bike,car)){
+
+            endGame();
+
+        }
+
+
+        if(y>innerHeight+170){
+
+            car.remove();
+
+            traffic.splice(index,1);
+
+            score+=25;
+
+            trafficSound();
+
+        }
+
+    });
+
+
+    /* SCORE */
+
+    distance+=
+        speed*.0025*dt;
+
+    score+=
+        .08*dt;
+
+
+    distanceText.textContent=
+        Math.floor(distance);
+
+    scoreText.textContent=
+        Math.floor(score);
+
+    speedText.textContent=
+        Math.floor(speed);
+
+
+    requestAnimationFrame(loop);
+
+}
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+function endGame(){
+
+    if(!playing)return;
+
+    playing=false;
+
+    crashSound();
+
+    finalScore.textContent=
+        Math.floor(score);
+
+    gameOver.style.display="flex";
+
+    lastTime=0;
+
+}
+
+</script>
+
+</body>
+</html>

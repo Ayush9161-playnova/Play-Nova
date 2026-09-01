@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Penalty Tournament 2026 - Ultimate Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Montserrat:wght@400;700&display=swap');
+        
+        body { margin: 0; background: #080a10; display: flex; justify-content: center; align-items: center; height: 100vh; color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+        #game-container { width: 100%; max-width: 420px; text-align: center; padding: 10px; }
+        
+        #hud { display: flex; justify-content: space-between; padding: 8px 15px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 6px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); font-size: 13px; }
+        
+        canvas { background: #15803d; border: 3px solid #fff; border-radius: 14px; touch-action: none; display: block; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* स्क्रीन की पैडिंग और स्पेसिंग ठीक की गई है ताकि ओवरलैप न हो */
+        .screen { position: absolute; inset: 10px; background: rgba(8, 10, 16, 0.98); display: flex; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 10; border-radius: 14px; padding: 15px; overflow-y: auto; }
+        .hidden { display: none !important; }
+        
+        .btn { padding: 10px 25px; background: #3b82f6; border: none; color: white; border-radius: 25px; font-weight: bold; cursor: pointer; margin: 10px 0; font-family: 'Russo One'; box-shadow: 0 4px 15px rgba(59,130,246,0.4); font-size: 13px; }
+        .btn:active { transform: scale(0.97); }
+
+        .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; width: 100%; }
+        .team-card { background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.2); padding: 7px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .team-card.selected { border-color: #3b82f6; background: rgba(59,130,246,0.2); }
+
+        /* पॉइंट्स टेबल का साइज कॉम्पैक्ट किया गया है */
+        table { width: 100%; border-collapse: collapse; margin: 5px 0; font-size: 11px; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 5px 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { background: rgba(59,130,246,0.3); font-family: 'Russo One'; }
+
+        #status { font-family: 'Russo One'; font-size: 15px; margin: 8px 0; color: #fbbf24; text-shadow: 0 0 5px rgba(251,191,36,0.4); }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="hud">
+        <div id="user-hud">IND: 0</div>
+        <div id="level-indicator" style="color:#38bdf8;">LVL 1</div>
+        <div id="opp-hud">BRA: 0</div>
+    </div>
+    
+    <div id="status">SELECT TEAM</div>
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+    
+    <!-- Menu Screen -->
+    <div id="menu-screen" class="screen">
+        <h2 style="font-family:'Russo One'; color:#60a5fa; margin-bottom:2px; font-size:18px;">WORLD TOURNAMENT</h2>
+        <p style="font-size:10px; color:#94a3b8; margin-bottom:6px;">CHOOSE YOUR NATIONAL TEAM</p>
+        
+        <div class="team-grid">
+            <div class="team-card selected" onclick="selectTeam('INDIA', '🇮🇳')" id="card-INDIA">INDIA (IN)</div>
+            <div class="team-card" onclick="selectTeam('BRAZIL', '🇧🇷')" id="card-BRAZIL">BRAZIL (BR)</div>
+            <div class="team-card" onclick="selectTeam('ARGENTINA', '🇦🇷')" id="card-ARGENTINA">ARGENTINA (AR)</div>
+            <div class="team-card" onclick="selectTeam('GERMANY', 'GE')" id="card-GERMANY">GERMANY (GE)</div>
+            <div class="team-card" onclick="selectTeam('PORTUGAL', 'PO')" id="card-PORTUGAL">PORTUGAL (PO)</div>
+            <div class="team-card" onclick="selectTeam('FRANCE', 'FR')" id="card-FRANCE">FRANCE (FR)</div>
+        </div>
+
+        <h3 style="font-size:12px; margin: 6px 0 3px 0; font-family:'Russo One'; color:#38bdf8;">POINTS TABLE</h3>
+        <table>
+            <thead>
+                <tr><th>Team</th><th>P</th><th>W</th><th>Pts</th></tr>
+            </thead>
+            <tbody id="points-table-body"></tbody>
+        </table>
+
+        <button class="btn" onclick="startTournamentMatch()">START NEXT MATCH</button>
+    </div>
+
+    <!-- Match Over Screen -->
+    <div id="gameover-screen" class="screen hidden">
+        <h2 id="winner-title" style="font-family:'Russo One'; font-size:20px; color:#60a5fa; margin-bottom:8px;">MATCH FINISHED</h2>
+        <p id="final-stats" style="font-size:12px; margin-bottom:12px; line-height: 1.4;"></p>
+        <button class="btn" onclick="openMenuFromOver()">CONTINUE TO TOURNAMENT</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let selectedTeam = 'INDIA';
+    let teamFlag = '🇮🇳';
+    let allTeams = ['INDIA', 'BRAZIL', 'ARGENTINA', 'GERMANY', 'PORTUGAL', 'FRANCE'];
+    let opponents = allTeams.filter(t => t !== selectedTeam);
+    let currentOppIndex = 0;
+    let oppTeam = opponents[currentOppIndex];
+    
+    let userScore = 0;
+    let oppScore = 0;
+    let round = 1;
+    let isUserTurn = true; 
+    let gameState = 'MENU';
+
+    let currentLevel = 1;
+    let keeperSpeed = 0.08;
+    let aiShotSpeed = 14;
+
+    // अब इसमें सभी 6 टीमों का डेटा मौजूद है
+    let standings = {
+        'INDIA': {p: 0, w: 0, pts: 0},
+        'BRAZIL': {p: 0, w: 0, pts: 0},
+        'ARGENTINA': {p: 0, w: 0, pts: 0},
+        'GERMANY': {p: 0, w: 0, pts: 0},
+        'PORTUGAL': {p: 0, w: 0, pts: 0},
+        'FRANCE': {p: 0, w: 0, pts: 0}
+    };
+
+    let ball = { x: 200, y: 430, radius: 11, vx: 0, vy: 0, active: false };
+    let keeper = { x: 170, y: 90, w: 60, h: 45 };
+    let playerDefender = { x: 170, y: 90, w: 60, h: 45 };
+
+    let audioCtx = null;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+        try {
+            initAudio();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if(type === 'kick') {
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else if(type === 'goal_cheer') {
+                let now = audioCtx.currentTime;
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.setValueAtTime(450, now + 0.1);
+                osc.frequency.setValueAtTime(600, now + 0.2);
+                osc.frequency.setValueAtTime(750, now + 0.3);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                osc.start(now); osc.stop(now + 0.6);
+            } else if(type === 'save') {
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+            }
+        } catch(e){}
+    }
+
+    window.onload = function() {
+        let saved = localStorage.getItem('penalty_standings_ultimate_v2');
+        if(saved) standings = JSON.parse(saved);
+        updateTableHTML();
+    }
+
+    function saveTableData() {
+        localStorage.setItem('penalty_standings_ultimate_v2', JSON.stringify(standings));
+    }
+
+    function updateTableHTML() {
+        let tbody = document.getElementById('points-table-body');
+        tbody.innerHTML = '';
+        for(let team in standings) {
+            let row = `<tr>
+                <td style="text-align:left; font-weight:bold; ${team===selectedTeam?'color:#60a5fa;':''}">${team}</td>
+                <td>${standings[team].p}</td>
+                <td>${standings[team].w}</td>
+                <td style="font-family:'Russo One'; color:#fbbf24;">${standings[team].pts}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        }
+    }
+
+    function selectTeam(team, flag) {
+        selectedTeam = team;
+        teamFlag = flag;
+        document.querySelectorAll('.team-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById(`card-${team}`).classList.add('selected');
+        
+        opponents = allTeams.filter(t => t !== team);
+        currentOppIndex = 0;
+        oppTeam = opponents[currentOppIndex];
+        updateTableHTML();
+    }
+
+    function startTournamentMatch() {
+        userScore = 0; oppScore = 0; round = 1;
+        isUserTurn = true;
+        
+        document.getElementById('menu-screen').classList.add('hidden');
+        document.getElementById('user-hud').innerText = `${teamFlag} ${userScore}`;
+        document.getElementById('opp-hud').innerText = `${oppTeam.substring(0,3)}: ${oppScore}`;
+        document.getElementById('level-indicator').innerText = `LVL ${currentLevel}`;
+        startTurn();
+    }
+
+    function startTurn() {
+        ball = { x: 200, y: 430, radius: 11, vx: 0, vy: 0, active: false };
+        keeper.x = 170;
+        playerDefender.x = 170;
+
+        if (isUserTurn) {
+            document.getElementById('status').innerText = `ROUND ${round}: YOUR PENALTY (Level ${currentLevel})`;
+            gameState = 'SHOOTING';
+        } else {
+            document.getElementById('status').innerText = `ROUND ${round}: DEFEND THE GOAL!`;
+            setTimeout(aiShoot, 800);
+            gameState = 'DEFENDING';
+        }
+    }
+
+    function aiShoot() {
+        if(gameState !== 'DEFENDING') return;
+        playSound('kick');
+        let targetX = 70 + Math.random() * 260;
+        let targetY = 70;
+        
+        let speedFactor = aiShotSpeed - (currentLevel * 0.8);
+        if(speedFactor < 9) speedFactor = 9;
+
+        ball.vx = (targetX - ball.x) / speedFactor;
+        ball.vy = (targetY - ball.y) / speedFactor;
+        ball.active = true;
+    }
+
+    function drawRealisticGoal() {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.beginPath();
+        ctx.moveTo(60, 50); ctx.lineTo(30, 25);
+        ctx.lineTo(370, 25); ctx.lineTo(340, 50);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(340, 50); ctx.lineTo(370, 25);
+        ctx.lineTo(370, 135); ctx.lineTo(340, 160);
+        ctx.fill();
+
+        ctx.lineWidth = 1; 
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        for(let i = 80; i < 340; i += 20) { 
+            ctx.beginPath(); ctx.moveTo(i, 50); ctx.lineTo(i - 4, 25); ctx.lineTo(i, 160); ctx.stroke(); 
+        }
+        for(let i = 50; i < 160; i += 20) { 
+            ctx.beginPath(); ctx.moveTo(60, i); ctx.lineTo(30, i - 5); ctx.lineTo(340, i); ctx.stroke(); 
+        }
+
+        ctx.strokeStyle = '#ffffff'; 
+        ctx.lineWidth = 6;
+        ctx.strokeRect(60, 50, 280, 110);
+    }
+
+    function drawGoalkeeper(kObj, isUserControlled) {
+        let shirtColor = isUserControlled ? '#3b82f6' : '#f59e0b';
+        
+        ctx.fillStyle = shirtColor;
+        ctx.fillRect(kObj.x, kObj.y + 10, kObj.w, kObj.h - 15);
+
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(kObj.x - 10, kObj.y + 12, 12, 14);
+        ctx.fillRect(kObj.x + kObj.w - 2, kObj.y + 12, 12, 14);
+
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(kObj.x + 8, kObj.y + kObj.h - 8, kObj.w - 16, 10);
+
+        ctx.fillStyle = '#fbcfe8';
+        ctx.beginPath(); 
+        ctx.arc(kObj.x + kObj.w/2, kObj.y + 3, 9, 0, Math.PI * 2); 
+        ctx.fill();
+        
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); 
+        ctx.arc(kObj.x + kObj.w/2, kObj.y, 8, Math.PI, Math.PI * 2); 
+        ctx.fill();
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, 400, 500);
+        drawRealisticGoal();
+
+        if (gameState === 'SHOOTING') {
+            drawGoalkeeper(keeper, false);
+        } else if (gameState === 'DEFENDING') {
+            drawGoalkeeper(playerDefender, true);
+        }
+
+        ctx.fillStyle = 'white';
+        ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    function update() {
+        if (ball.active) {
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            if (gameState === 'SHOOTING') {
+                let dynamicSpeed = keeperSpeed + (currentLevel * 0.015);
+                keeper.x += (ball.x - (keeper.x + keeper.w/2)) * dynamicSpeed;
+                
+                if(keeper.x < 65) keeper.x = 65;
+                if(keeper.x > 335 - keeper.w) keeper.x = 335 - keeper.w;
+
+                if (ball.y <= 110) {
+                    ball.active = false;
+                    let saved = (ball.x > keeper.x - 5 && ball.x < keeper.x + keeper.w + 5);
+                    if (saved) {
+                        playSound('save');
+                        document.getElementById('status').innerText = "SPECTACULAR SAVE BY KEEPER! 🧤";
+                    } else if (ball.x >= 60 && ball.x <= 340) {
+                        playSound('goal_cheer');
+                        userScore++;
+                        document.getElementById('user-hud').innerText = `${teamFlag} ${userScore}`;
+                        document.getElementById('status').innerText = "GOAL! ⚽🎉";
+                    } else {
+                        playSound('save');
+                        document.getElementById('status').innerText = "SHOT WIDE! ❌";
+                    }
+                    nextTurnSequence();
+                }
+            } else if (gameState === 'DEFENDING') {
+                if (ball.y <= 110) {
+                    ball.active = false;
+                    let saved = (ball.x > playerDefender.x - 5 && ball.x < playerDefender.x + playerDefender.w + 5);
+                    if (saved) {
+                        playSound('goal_cheer');
+                        document.getElementById('status').innerText = "BRILLIANT SAVE BY YOU! 🧤🔥";
+                    } else {
+                        playSound('goal_cheer');
+                        oppScore++;
+                        document.getElementById('opp-hud').innerText = `${oppTeam.substring(0,3)}: ${oppScore}`;
+                        document.getElementById('status').innerText = "OPPONENT SCORED! ⚽";
+                    }
+                    nextTurnSequence();
+                }
+            }
+        }
+        draw();
+        requestAnimationFrame(update);
+    }
+
+    function nextTurnSequence() {
+        setTimeout(() => {
+            if (isUserTurn) {
+                isUserTurn = false;
+                startTurn();
+            } else {
+                round++;
+                if (round > 3) {
+                    endGame();
+                } else {
+                    isUserTurn = true;
+                    startTurn();
+                }
+            }
+        }, 1500);
+    }
+
+    function endGame() {
+        gameState = 'OVER';
+        document.getElementById('gameover-screen').classList.remove('hidden');
+        
+        if(!standings[selectedTeam]) standings[selectedTeam] = {p:0, w:0, pts:0};
+        if(!standings[oppTeam]) standings[oppTeam] = {p:0, w:0, pts:0};
+
+        standings[selectedTeam].p += 1;
+        standings[oppTeam].p += 1;
+
+        let resultText = "";
+        if (userScore > oppScore) {
+            standings[selectedTeam].w += 1;
+            standings[selectedTeam].pts += 3;
+            currentLevel++;
+            resultText = `VICTORY! LEVEL UP TO LVL ${currentLevel}! 🏆\nScore: ${selectedTeam} (${userScore}) - (${oppScore}) ${oppTeam}\n(+3 Points)`;
+        } else if (userScore < oppScore) {
+            standings[oppTeam].w += 1;
+            standings[oppTeam].pts += 3;
+            resultText = `DEFEAT AGAINST ${oppTeam}! ❌\nScore: ${selectedTeam} (${userScore}) - (${oppScore}) ${oppTeam}`;
+        } else {
+            standings[selectedTeam].pts += 1;
+            standings[oppTeam].pts += 1;
+            resultText = `DRAW MATCH WITH ${oppTeam}! 🤝\nScore: ${selectedTeam} (${userScore}) - (${oppScore}) ${oppTeam}\n(+1 Point)`;
+        }
+
+        saveTableData();
+        updateTableHTML();
+        document.getElementById('final-stats').innerText = resultText;
+
+        currentOppIndex = (currentOppIndex + 1) % opponents.length;
+        oppTeam = opponents[currentOppIndex];
+    }
+
+    function openMenuFromOver() {
+        document.getElementById('gameover-screen').classList.add('hidden');
+        document.getElementById('menu-screen').classList.remove('hidden');
+        document.getElementById('status').innerText = "SELECT TEAM";
+        gameState = 'MENU';
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        let clientX = e.clientX - rect.left;
+        
+        if (gameState === 'SHOOTING' && !ball.active) {
+            playSound('kick');
+            let targetX = clientX;
+            let targetY = 70;
+            
+            ball.vx = (targetX - ball.x) / 13;
+            ball.vy = (targetY - ball.y) / 13;
+            ball.active = true;
+        } else if (gameState === 'DEFENDING') {
+            playerDefender.x = clientX - playerDefender.w/2;
+            if(playerDefender.x < 65) playerDefender.x = 65;
+            if(playerDefender.x > 335 - playerDefender.w) playerDefender.x = 335 - playerDefender.w;
+        }
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+        if (gameState === 'DEFENDING') {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = e.clientX - rect.left;
+            playerDefender.x = clientX - playerDefender.w/2;
+            if(playerDefender.x < 65) playerDefender.x = 65;
+            if(playerDefender.x > 335 - playerDefender.w) playerDefender.x = 335 - playerDefender.w;
+        }
+    });
+
+    update();
+</script>
+</body>
+</html>

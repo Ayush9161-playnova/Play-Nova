@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cyberpunk Neon Rush - Ultra Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: #020205;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            height: 100vh;
+            max-height: 780px;
+            background: #060913;
+            border-left: 6px solid #00f2fe;
+            border-right: 6px solid #00f2fe;
+            box-shadow: 0 0 50px rgba(0, 242, 254, 0.4);
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* HUD Dashboard */
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .hud-card {
+            background: rgba(10, 15, 30, 0.85);
+            border: 1px solid rgba(0, 242, 254, 0.4);
+            padding: 8px 14px;
+            border-radius: 8px;
+            color: #fff;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .hud-label {
+            font-size: 9px;
+            color: #8a99ad;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #00f2fe;
+            margin-top: 2px;
+        }
+
+        /* Overlays */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(4, 6, 12, 0.94);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 30;
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .overlay h1 {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00f2fe, #ff0055);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .overlay p {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 25px;
+        }
+
+        .score-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            width: 80%;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .score-row span {
+            color: #00f2fe;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #05070c;
+            background: linear-gradient(45deg, #00f2fe, #00c6ff);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Touch Controls */
+        #mobile-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 20;
+        }
+
+        .control-btn {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(0, 242, 254, 0.4);
+            color: #00f2fe;
+            font-size: 26px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .control-btn:active {
+            background: rgba(0, 242, 254, 0.3);
+            box-shadow: 0 0 15px #00f2fe;
+        }
+
+        .hide { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-card">
+                <div class="hud-label">Score</div>
+                <div class="hud-value" id="score">0</div>
+            </div>
+            <div class="hud-card">
+                <div class="hud-label">Speed</div>
+                <div class="hud-value"><span id="speed">120</span> <small>KM/H</small></div>
+            </div>
+            <div class="hud-card">
+                <div class="hud-label">High Score</div>
+                <div class="hud-value" id="high-score" style="color: #ffd700;">0</div>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="overlay">
+            <h1>Cyber Neon Bike</h1>
+            <p>Next-Gen High-Speed Moto Racer</p>
+            <button class="btn" onclick="startGame()">START RIDE</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="overlay hide">
+            <h1 style="background: linear-gradient(45deg, #ff0844, #ffb199); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CRASHED!</h1>
+            <div class="score-box">
+                <div class="score-row"><span>Score</span><span id="final-score">0</span></div>
+                <div class="score-row"><span>Best</span><span id="final-high-score" style="color: #ffd700;">0</span></div>
+            </div>
+            <button class="btn" onclick="startGame()">PLAY AGAIN</button>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Controls -->
+        <div id="mobile-controls">
+            <div class="control-btn" id="btn-left">◀</div>
+            <div class="control-btn" id="btn-right">▶</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // UI Elements
+        const scoreEl = document.getElementById('score');
+        const speedEl = document.getElementById('speed');
+        const highScoreEl = document.getElementById('high-score');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalHighScoreEl = document.getElementById('final-high-score');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+
+        let isPlaying = false;
+        let score = 0;
+        let highScore = localStorage.getItem('neon_bike_highscore') || 0;
+        highScoreEl.innerText = highScore;
+
+        let gameSpeed = 6;
+        let roadOffset = 0;
+        
+        let bike = {
+            x: canvas.width / 2 - 16,
+            y: canvas.height - 140,
+            w: 32,
+            h: 68,
+            tilt: 0
+        };
+
+        let obstacles = [];
+        let boostPads = [];
+        let particles = [];
+        let boostTimer = 0;
+
+        let keys = { ArrowLeft: false, ArrowRight: false };
+
+        // Web Audio API Setup for High Quality Sound
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        function initAudio() { if (!audioCtx) audioCtx = new AudioCtx(); }
+
+        function playEngineSound(freq) {
+            if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e){}
+        }
+
+        function playCrashSound() {
+            if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } catch(e){}
+        }
+
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.ArrowLeft = true;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.ArrowRight = true;
+        });
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a') keys.ArrowLeft = false;
+            if (e.key === 'ArrowRight' || e.key === 'd') keys.ArrowRight = false;
+        });
+
+        const bindTouch = (elem, key) => {
+            elem.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+            elem.addEventListener('touchend', () => keys[key] = false);
+            elem.addEventListener('mousedown', () => keys[key] = true);
+            elem.addEventListener('mouseup', () => keys[key] = false);
+        };
+        bindTouch(document.getElementById('btn-left'), 'ArrowLeft');
+        bindTouch(document.getElementById('btn-right'), 'ArrowRight');
+
+        function startGame() {
+            initAudio();
+            isPlaying = true;
+            score = 0;
+            gameSpeed = 6;
+            boostTimer = 0;
+            bike.x = canvas.width / 2 - 16;
+            obstacles = [];
+            boostPads = [];
+            particles = [];
+
+            startScreen.classList.add('hide');
+            gameOverScreen.classList.add('hide');
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function spawnEntities() {
+            let roadMargin = 45;
+            let maxX = canvas.width - roadMargin - 40;
+            let minX = roadMargin;
+
+            if (Math.random() < 0.03) {
+                let ex = Math.random() * (maxX - minX) + minX;
+                obstacles.push({ x: ex, y: -100, w: 36, h: 70, color: '#ff0055' });
+            }
+
+            if (Math.random() < 0.015) {
+                let bx = Math.random() * (maxX - minX) + minX;
+                boostPads.push({ x: bx, y: -80, w: 30, h: 45 });
+            }
+        }
+
+        // Realistic High-Detail Sports/Tron Bike Graphics
+        function drawSportsBike(x, y, w, h, tilt, isBoosted) {
+            ctx.save();
+            ctx.translate(x + w/2, y + h/2);
+            ctx.rotate(tilt * Math.PI / 180);
+
+            // Glowing Laser Trail Behind Bike
+            ctx.fillStyle = isBoosted ? '#00ffcc' : '#00f2fe';
+            ctx.shadowColor = isBoosted ? '#00ffcc' : '#00f2fe';
+            ctx.shadowBlur = 25;
+            ctx.fillRect(-4, h/2, 8, isBoosted ? 50 : 30);
+
+            // Ground Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(-w/2 + 4, -h/2 + 6, w, h);
+
+            // Tires with Rim Glow
+            ctx.fillStyle = '#111';
+            ctx.fillRect(-w/2 - 3, -h/2 + 10, 6, 18);
+            ctx.fillRect(w/2 - 3, -h/2 + 10, 6, 18);
+            ctx.fillRect(-w/2 - 3, h/2 - 24, 6, 18);
+            ctx.fillRect(w/2 - 3, h/2 - 24, 6, 18);
+
+            // Aero Fairing Bodywork (Realistic Sports Bike Shape)
+            let grad = ctx.createLinearGradient(0, -h/2, 0, h/2);
+            grad.addColorStop(0, isBoosted ? '#00ffcc' : '#00f2fe');
+            grad.addColorStop(0.5, '#202938');
+            grad.addColorStop(1, '#050a14');
+            ctx.fillStyle = grad;
+
+            ctx.beginPath();
+            ctx.moveTo(-w/2 + 4, -h/2);
+            ctx.lineTo(w/2 - 4, -h/2);
+            ctx.lineTo(w/2 + 2, -h/2 + 22);
+            ctx.lineTo(w/2 - 2, h/2 - 6);
+            ctx.lineTo(-w/2 + 2, h/2 - 6);
+            ctx.lineTo(-w/2 - 2, -h/2 + 22);
+            ctx.closePath();
+            ctx.fill();
+
+            // Tinted Windshield Canopy
+            ctx.fillStyle = '#020408';
+            ctx.beginPath();
+            ctx.moveTo(-w/2 + 8, -h/2 + 22);
+            ctx.lineTo(w/2 - 8, -h/2 + 22);
+            ctx.lineTo(w/2 - 10, -h/2 + 44);
+            ctx.lineTo(-w/2 + 10, -h/2 + 44);
+            ctx.closePath();
+            ctx.fill();
+
+            // Dual LED Headlights
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = '#00f2fe';
+            ctx.shadowBlur = 15;
+            ctx.fillRect(-w/2 + 7, -h/2 + 3, 6, 3);
+            ctx.fillRect(w/2 - 13, -h/2 + 3, 6, 3);
+
+            ctx.restore();
+        }
+
+        function drawWorld() {
+            ctx.fillStyle = '#060913';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Dynamic Neon Grid Lines
+            roadOffset = (roadOffset + gameSpeed) % 45;
+            ctx.strokeStyle = 'rgba(0, 242, 254, 0.15)';
+            ctx.lineWidth = 2;
+
+            for (let y = -45 + roadOffset; y < canvas.height; y += 45) {
+                ctx.beginPath();
+                ctx.moveTo(35, y);
+                ctx.lineTo(canvas.width - 35, y);
+                ctx.stroke();
+            }
+
+            // Glowing Road Side Curbs
+            ctx.fillStyle = '#ff0055';
+            ctx.shadowColor = '#ff0055';
+            ctx.shadowBlur = 8;
+            ctx.fillRect(24, 0, 8, canvas.height);
+            ctx.fillRect(canvas.width - 32, 0, 8, canvas.height);
+            ctx.shadowBlur = 0;
+        }
+
+        function createExplosion(x, y) {
+            for (let i = 0; i < 35; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    size: Math.random() * 5 + 2,
+                    color: ['#ff0055', '#00f2fe', '#ffd700', '#ffffff'][Math.floor(Math.random() * 4)],
+                    life: 25
+                });
+            }
+        }
+
+        function gameLoop() {
+            if (!isPlaying) return;
+
+            let currentSpeedMult = 1;
+            if (boostTimer > 0) {
+                boostTimer--;
+                currentSpeedMult = 1.8;
+            }
+
+            gameSpeed = (6 + Math.floor(score / 120)) * currentSpeedMult;
+
+            if (Math.random() < 0.25) {
+                playEngineSound((boostTimer > 0 ? 140 : 70) + gameSpeed * 4);
+            }
+
+            // Controls & Smooth Tilt
+            if (keys.ArrowLeft && bike.x > 40) {
+                bike.x -= 7.5;
+                bike.tilt = -9;
+            } else if (keys.ArrowRight && bike.x < canvas.width - bike.w - 40) {
+                bike.x += 7.5;
+                bike.tilt = 9;
+            } else {
+                bike.tilt = 0;
+            }
+
+            drawWorld();
+            spawnEntities();
+
+            // Boost Pads Render & Collision
+            boostPads.forEach((pad, index) => {
+                pad.y += gameSpeed;
+                ctx.fillStyle = '#00ffcc';
+                ctx.shadowColor = '#00ffcc';
+                ctx.shadowBlur = 20;
+                ctx.fillRect(pad.x, pad.y, pad.w, pad.h);
+                ctx.shadowBlur = 0;
+
+                if (
+                    bike.x < pad.x + pad.w &&
+                    bike.x + bike.w > pad.x &&
+                    bike.y < pad.y + pad.h &&
+                    bike.y + bike.h > pad.y
+                ) {
+                    boostTimer = 100; // Boost active
+                    boostPads.splice(index, 1);
+                }
+
+                if (pad.y > canvas.height) boostPads.splice(index, 1);
+            });
+
+            // Obstacles Render & Collision
+            obstacles.forEach((obs, index) => {
+                obs.y += gameSpeed;
+
+                ctx.fillStyle = obs.color;
+                ctx.shadowColor = obs.color;
+                ctx.shadowBlur = 12;
+                ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                ctx.shadowBlur = 0;
+
+                if (obs.y > canvas.height) {
+                    obstacles.splice(index, 1);
+                    score += 10;
+                }
+
+                if (
+                    bike.x < obs.x + obs.w - 4 &&
+                    bike.x + bike.w > obs.x + 4 &&
+                    bike.y < obs.y + obs.h - 4 &&
+                    bike.y + bike.h > obs.y + 4
+                ) {
+                    createExplosion(bike.x + bike.w/2, bike.y + bike.h/2);
+                    playCrashSound();
+                    endGame();
+                }
+            });
+
+            // Particles Rendering
+            particles.forEach((p, index) => {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                if (p.life <= 0) particles.splice(index, 1);
+            });
+
+            drawSportsBike(bike.x, bike.y, bike.w, bike.h, bike.tilt, boostTimer > 0);
+
+            scoreEl.innerText = score;
+            speedEl.innerText = Math.floor(gameSpeed * 22);
+
+            if (isPlaying) requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            isPlaying = false;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('neon_bike_highscore', highScore);
+            }
+            highScoreEl.innerText = highScore;
+            finalScoreEl.innerText = score;
+            finalHighScoreEl.innerText = highScore;
+            gameOverScreen.classList.remove('hide');
+        }
+    </script>
+</body>
+</html>

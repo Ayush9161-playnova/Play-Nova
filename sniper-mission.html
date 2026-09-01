@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Operation Nightfall</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#030604;font-family:Arial,sans-serif;touch-action:none}
+canvas{width:100vw;height:100vh;display:block}
+
+#hud{position:fixed;inset:0;z-index:5;color:#fff;pointer-events:none}
+.top{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:7px}
+.box{background:rgba(2,7,4,.8);border:1px solid #ffffff2b;border-radius:11px;padding:8px 12px;font-size:13px}
+#mission{font-size:12px;font-weight:bold;letter-spacing:2px}
+#timer{color:#9df59d}
+#timer.danger{color:#ff4d4d}
+
+#level{position:absolute;left:50%;top:62px;transform:translateX(-50%);background:#0008;padding:7px 13px;border-radius:20px}
+#healthWrap{position:absolute;left:15px;top:65px;width:185px}
+.healthLabel{font-size:11px;margin-bottom:4px;text-shadow:0 2px 4px #000}
+.healthBar{height:12px;background:#222;border:1px solid #777;border-radius:8px;overflow:hidden}
+#health{width:100%;height:100%;background:#36d36b;transition:.2s}
+
+#commanderUI{position:absolute;left:50%;top:105px;transform:translateX(-50%);width:220px;display:none;text-align:center}
+.commanderName{font-size:11px;font-weight:bold;color:#ff7777;margin-bottom:4px}
+.commanderBar{height:10px;background:#261010;border:1px solid #a33;border-radius:7px;overflow:hidden}
+#commanderHealth{width:100%;height:100%;background:#ef4444;transition:.15s}
+
+#objective{position:absolute;left:15px;bottom:15px;padding:9px 13px;background:#020704cc;border-radius:11px;font-size:12px}
+#ammo{position:absolute;right:18px;bottom:15px;font-size:24px;font-weight:bold;text-shadow:0 2px 8px #000}
+#hit{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;font-size:25px;font-weight:bold;text-shadow:0 2px 10px #000;opacity:0;z-index:50;pointer-events:none}
+
+#scope{position:fixed;width:290px;height:290px;transform:translate(-50%,-50%);border:3px solid #eef2ee;border-radius:50%;display:none;pointer-events:none;z-index:20;box-shadow:0 0 0 100vmax #000d,inset 0 0 45px #000}
+.scopeH,.scopeV{position:absolute;background:#eef2eecf}
+.scopeH{width:100%;height:1px;top:50%}
+.scopeV{width:1px;height:100%;left:50%}
+.scopeDot{position:absolute;width:5px;height:5px;background:#fff;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+
+.control{position:fixed;z-index:30;border-radius:50%;color:#fff;font-weight:bold;border:2px solid #ffffff38;box-shadow:0 8px 25px #0008}
+#fire{width:90px;height:90px;right:20px;bottom:55px;background:#911212e8;border-color:#ef4444}
+#zoom{width:62px;height:62px;right:38px;bottom:160px;background:#000c}
+#reload{width:57px;height:57px;right:130px;bottom:68px;background:#000c}
+
+.screen{position:fixed;inset:0;z-index:100;display:flex;justify-content:center;align-items:center;background:#000e;color:#fff;text-align:center}
+.panel{width:min(92%,510px);padding:32px 24px;border-radius:24px;background:linear-gradient(145deg,#18261a,#050806);border:1px solid #536454;box-shadow:0 25px 90px #000}
+.panel h1{font-size:34px;margin-bottom:14px}
+.panel p{color:#cbd5d0;line-height:1.5;margin:6px}
+.btn{margin-top:20px;padding:14px 30px;border:0;border-radius:30px;color:#fff;background:linear-gradient(135deg,#dc2626,#7f1d1d);font-size:16px;font-weight:bold}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}
+.stat{padding:10px;border-radius:10px;background:#ffffff0f}
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="hud">
+<div class="top">
+<div class="box">LEVEL <b id="levelNum">1</b></div>
+<div id="mission">OPERATION NIGHTFALL</div>
+<div class="box">⏱️ <b id="timer">45</b>s</div>
+</div>
+
+<div id="level">
+TARGETS: <b id="targetCount">5</b>
+&nbsp; | &nbsp;
+SCORE: <b id="score">0</b>
+</div>
+
+<div id="healthWrap">
+<div class="healthLabel">❤️ PLAYER HEALTH <b id="healthText">100</b></div>
+<div class="healthBar"><div id="health"></div></div>
+</div>
+
+<div id="commanderUI">
+<div class="commanderName">⚠️ COMMANDER</div>
+<div class="commanderBar"><div id="commanderHealth"></div></div>
+</div>
+
+<div id="objective">🎯 Eliminate all hostiles</div>
+<div id="ammo">5 / 25</div>
+</div>
+
+<div id="scope">
+<div class="scopeH"></div>
+<div class="scopeV"></div>
+<div class="scopeDot"></div>
+</div>
+
+<button class="control" id="zoom">🔭</button>
+<button class="control" id="reload">↻</button>
+<button class="control" id="fire">FIRE</button>
+
+<div id="hit"></div>
+
+<div class="screen" id="startScreen">
+<div class="panel">
+<h1>🎯 OPERATION NIGHTFALL</h1>
+<p>Eliminate all hostile targets before time runs out.</p>
+<p>❤️ Your health decreases <b>ONLY when enemies attack you.</b></p>
+<p>🛡️ Commander takes multiple shots and gets stronger each level.</p>
+<p><b>PC:</b> Mouse aim • Click shoot • Z zoom • R reload</p>
+<p><b>Mobile:</b> Drag aim • FIRE • 🔭 Zoom</p>
+<button class="btn" id="startBtn">START MISSION</button>
+</div>
+</div>
+
+<div class="screen" id="endScreen" style="display:none">
+<div class="panel">
+<h1 id="endTitle">MISSION COMPLETE</h1>
+<div class="stats">
+<div class="stat">LEVEL<br><b id="finalLevel">1</b></div>
+<div class="stat">SCORE<br><b id="finalScore">0</b></div>
+<div class="stat">ACCURACY<br><b id="accuracy">0%</b></div>
+<div class="stat">BEST<br><b id="bestScore">0</b></div>
+</div>
+<button class="btn" id="again">PLAY AGAIN</button>
+</div>
+</div>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+let W=innerWidth,H=innerHeight,DPR=1;
+
+function resize(){
+ W=innerWidth;H=innerHeight;
+ DPR=Math.min(devicePixelRatio||1,2);
+ canvas.width=W*DPR;
+ canvas.height=H*DPR;
+ canvas.style.width=W+"px";
+ canvas.style.height=H+"px";
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+resize();
+addEventListener("resize",resize);
+
+let audio=null;
+
+function startAudio(){
+ if(!audio) audio=new(window.AudioContext||window.webkitAudioContext)();
+ if(audio.state==="suspended")audio.resume();
+}
+
+function sound(type){
+ if(!audio)return;
+
+ const o=audio.createOscillator();
+ const g=audio.createGain();
+
+ if(type==="gun"){
+  o.type="sawtooth";
+  o.frequency.setValueAtTime(150,audio.currentTime);
+  o.frequency.exponentialRampToValueAtTime(40,audio.currentTime+.2);
+  g.gain.setValueAtTime(.18,audio.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.2);
+ }else if(type==="hit"){
+  o.type="sine";
+  o.frequency.value=850;
+  g.gain.setValueAtTime(.1,audio.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.15);
+ }else if(type==="damage"){
+  o.type="square";
+  o.frequency.value=100;
+  g.gain.setValueAtTime(.12,audio.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.25);
+ }else{
+  o.type="sine";
+  o.frequency.value=450;
+  g.gain.setValueAtTime(.08,audio.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.3);
+ }
+
+ o.connect(g);
+ g.connect(audio.destination);
+ o.start();
+ o.stop(audio.currentTime+(type==="gun"?.2:.3));
+}
+
+let running=false;
+let level=1,score=0,shots=0,hits=0,combo=0;
+let ammo=5,reserve=25,playerHealth=100;
+let timeLeft=45,timerID=null;
+let zoomed=false,recoil=0,muzzle=0;
+let targets=[],particles=[],commander=null;
+
+const aim={x:W/2,y:H/2};
+
+function difficulty(){
+ return{
+  count:5+(level-1)*2,
+  time:Math.max(20,45-(level-1)*5),
+  speed:.45+(level-1)*.18,
+  size:Math.max(13,22-(level-1)*1.2),
+  commanderHP:3+(level-1)*2,
+  damage:3+(level-1)
+ };
+}
+
+function createTargets(){
+ const d=difficulty();
+ targets=[];
+ commander=null;
+
+ for(let i=0;i<d.count;i++){
+  const isCommander=i===d.count-1;
+  const x=W*(.1+Math.random()*.8);
+  const y=H*(.27+Math.random()*.22);
+
+  const t={
+   x,y,baseX:x,baseY:y,alive:true,
+   r:isCommander?d.size+5:d.size,
+   speed:d.speed+Math.random()*.3,
+   phase:Math.random()*Math.PI*2,
+   commander:isCommander,
+   hp:isCommander?d.commanderHP:1,
+   maxHP:isCommander?d.commanderHP:1,
+   attackTimer:90+Math.random()*100
+  };
+
+  targets.push(t);
+  if(isCommander)commander=t;
+ }
+
+ updateCommanderUI();
+}
+
+function drawBackground(){
+
+ const sky=ctx.createLinearGradient(0,0,0,H);
+ sky.addColorStop(0,"#050c08");
+ sky.addColorStop(.5,"#193421");
+ sky.addColorStop(1,"#09100b");
+ ctx.fillStyle=sky;
+ ctx.fillRect(0,0,W,H);
+
+ for(let i=0;i<65;i++){
+  const x=(i*137)%W,y=(i*71)%(H*.45);
+  ctx.fillStyle="#dcecdccc";
+  ctx.fillRect(x,y,1.5,1.5);
+ }
+
+ ctx.fillStyle="#e7ebca";
+ ctx.beginPath();
+ ctx.arc(W*.78,H*.14,34,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.fillStyle="#09170d";
+ ctx.beginPath();
+ ctx.moveTo(0,H*.57);
+ for(let x=0;x<=W;x+=65)
+  ctx.lineTo(x,H*.4+Math.sin(x*.014)*55);
+ ctx.lineTo(W,H);
+ ctx.lineTo(0,H);
+ ctx.closePath();
+ ctx.fill();
+
+ for(let i=0;i<15;i++){
+  const x=i*95-15,h=70+(i%5)*28;
+  ctx.fillStyle=i%2?"#101b14":"#18251b";
+  ctx.fillRect(x,H*.57-h,72,h);
+
+  for(let y=H*.57-h+13;y<H*.57-8;y+=22){
+   ctx.fillStyle="#eec24640";
+   ctx.fillRect(x+12,y,8,8);
+   ctx.fillRect(x+40,y,8,8);
+  }
+ }
+
+ ctx.fillStyle="#0e1711";
+ ctx.fillRect(0,H*.57,W,H*.43);
+
+ ctx.fillStyle="#202722";
+ ctx.beginPath();
+ ctx.moveTo(W*.38,H*.57);
+ ctx.lineTo(W*.62,H*.57);
+ ctx.lineTo(W*.84,H);
+ ctx.lineTo(W*.16,H);
+ ctx.closePath();
+ ctx.fill();
+
+ ctx.strokeStyle="#d4cb8d";
+ ctx.lineWidth=3;
+ ctx.setLineDash([28,24]);
+ ctx.beginPath();
+ ctx.moveTo(W/2,H*.6);
+ ctx.lineTo(W/2,H);
+ ctx.stroke();
+ ctx.setLineDash([]);
+
+ for(let i=0;i<24;i++){
+  const x=(i*109)%W,y=H*.46+(i%5)*42;
+  ctx.fillStyle="#302318";
+  ctx.fillRect(x,y,8,48);
+  ctx.fillStyle="#12301a";
+  ctx.beginPath();
+  ctx.arc(x+4,y-8,27,0,Math.PI*2);
+  ctx.fill();
+ }
+
+ const fog=ctx.createLinearGradient(0,H*.45,0,H*.8);
+ fog.addColorStop(0,"transparent");
+ fog.addColorStop(1,"#aabaaa1a");
+ ctx.fillStyle=fog;
+ ctx.fillRect(0,H*.45,W,H*.35);
+}
+
+function drawTarget(t){
+ if(!t.alive)return;
+
+ const bob=Math.sin(t.phase)*3;
+
+ ctx.save();
+ ctx.translate(t.x,t.y+bob);
+
+ ctx.fillStyle="#0000008c";
+ ctx.beginPath();
+ ctx.ellipse(0,36,25,8,0,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.fillStyle=t.commander?"#414c31":"#1b2a20";
+ ctx.fillRect(-16,9,32,35);
+
+ ctx.strokeStyle="#71806d";
+ ctx.lineWidth=2;
+ ctx.strokeRect(-13,12,26,23);
+
+ ctx.fillStyle="#a96f4f";
+ ctx.beginPath();
+ ctx.arc(0,0,13,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.fillStyle=t.commander?"#697448":"#364238";
+ ctx.beginPath();
+ ctx.arc(0,-3,14,Math.PI,Math.PI*2);
+ ctx.fill();
+
+ ctx.fillStyle="#111";
+ ctx.fillRect(-7,0,4,3);
+ ctx.fillRect(3,0,4,3);
+
+ ctx.strokeStyle="#a96f4f";
+ ctx.lineWidth=6;
+ ctx.beginPath();
+ ctx.moveTo(-9,18);
+ ctx.lineTo(-23,25);
+ ctx.moveTo(9,18);
+ ctx.lineTo(23,14);
+ ctx.stroke();
+
+ ctx.strokeStyle="#070907";
+ ctx.lineWidth=5;
+ ctx.beginPath();
+ ctx.moveTo(8,20);
+ ctx.lineTo(43,8);
+ ctx.stroke();
+
+ ctx.strokeStyle=t.commander?"#ff3d3db3":"#ef444473";
+ ctx.lineWidth=1;
+ ctx.beginPath();
+ ctx.arc(0,0,t.r+7,0,Math.PI*2);
+ ctx.stroke();
+
+ if(t.commander){
+  ctx.fillStyle="#ff5252";
+  ctx.font="bold 10px Arial";
+  ctx.textAlign="center";
+  ctx.fillText("COMMANDER",0,-29);
+
+  ctx.fillStyle="#351010";
+  ctx.fillRect(-24,-43,48,5);
+
+  ctx.fillStyle="#ef4444";
+  ctx.fillRect(-24,-43,48*(t.hp/t.maxHP),5);
+ }
+
+ ctx.restore();
+}
+
+function burst(x,y){
+ for(let i=0;i<28;i++){
+  particles.push({
+   x,y,
+   vx:(Math.random()-.5)*7,
+   vy:(Math.random()-.5)*7,
+   life:25+Math.random()*30
+  });
+ }
+}
+
+function shoot(){
+
+ if(!running)return;
+
+ if(ammo<=0){
+  reload();
+  return;
+ }
+
+ ammo--;
+ shots++;
+ recoil=10;
+ muzzle=1;
+ sound("gun");
+
+ let target=null;
+ let distance=Infinity;
+
+ targets.forEach(t=>{
+  if(!t.alive)return;
+
+  const d=Math.hypot(t.x-aim.x,t.y-aim.y);
+
+  if(d<distance){
+   distance=d;
+   target=t;
+  }
+ });
+
+ const hitRadius=zoomed?48:29;
+
+ if(target&&distance<hitRadius){
+
+  hits++;
+
+  /*
+   IMPORTANT:
+   GOLI MARNE PAR PLAYER HEALTH
+   YAHAN KAHIN BHI DECREASE NAHI HOTI.
+  */
+
+  if(target.commander){
+   damageCommander(target);
+  }else{
+   target.alive=false;
+   combo++;
+   score+=500+Math.min(1500,combo*100);
+   burst(target.x,target.y);
+   sound("hit");
+   showHit("TARGET DOWN");
+  }
+
+ }else{
+  combo=0;
+ }
+
+ hudUpdate();
+
+ if(targets.every(t=>!t.alive)){
+  setTimeout(nextLevel,700);
+ }
+}
+
+function damageCommander(t){
+
+ t.hp--;
+ combo++;
+
+ score+=t.hp>0?150:1500;
+
+ burst(t.x,t.y);
+ sound("hit");
+ updateCommanderUI();
+
+ if(t.hp>0){
+  showHit("COMMANDER HIT • "+t.hp+" HP LEFT");
+ }else{
+  t.alive=false;
+  commander=null;
+  showHit("⚡ COMMANDER DOWN!");
+  updateCommanderUI();
+ }
+}
+
+function damagePlayer(amount){
+
+ if(!running)return;
+
+ playerHealth=Math.max(0,playerHealth-amount);
+
+ sound("damage");
+ showHit("⚠️ HEALTH -"+amount);
+ hudUpdate();
+
+ if(playerHealth<=0)
+  missionFailed();
+}
+
+/*
+ ENEMY ATTACK ONLY:
+ player health is changed here,
+ NOT inside shoot().
+*/
+function enemyAttack(t){
+
+ if(!t.alive)return;
+
+ const d=Math.hypot(t.x-aim.x,t.y-aim.y);
+
+ const damage=t.commander
+  ?difficulty().damage+2
+  :difficulty().damage;
+
+ if(d<170)
+  damagePlayer(damage);
+}
+
+function showHit(text){
+ const el=document.getElementById("hit");
+ el.textContent=text;
+ el.style.opacity="1";
+
+ setTimeout(()=>{
+  el.style.opacity="0";
+ },650);
+}
+
+function reload(){
+
+ if(ammo===5||reserve<=0)return;
+
+ const need=5-ammo;
+ const amount=Math.min(need,reserve);
+
+ ammo+=amount;
+ reserve-=amount;
+
+ hudUpdate();
+}
+
+function toggleZoom(){
+
+ zoomed=!zoomed;
+
+ document.getElementById("scope").style.display=
+  zoomed?"block":"none";
+
+ updateScope();
+}
+
+function updateScope(){
+
+ if(!zoomed)return;
+
+ const s=document.getElementById("scope");
+ s.style.left=aim.x+"px";
+ s.style.top=aim.y+"px";
+}
+
+function updateCommanderUI(){
+
+ const ui=document.getElementById("commanderUI");
+
+ if(commander&&commander.alive){
+
+  ui.style.display="block";
+
+  document.getElementById("commanderHealth").style.width=
+   (commander.hp/commander.maxHP*100)+"%";
+
+ }else{
+  ui.style.display="none";
+ }
+}
+
+function update(){
+
+ recoil*=.78;
+ muzzle*=.8;
+
+ targets.forEach(t=>{
+
+  if(!t.alive)return;
+
+  t.phase+=.008*t.speed;
+
+  t.x=t.baseX+Math.sin(t.phase)*(12+level*2);
+  t.y=t.baseY+Math.cos(t.phase*.7)*5;
+
+  t.attackTimer--;
+
+  if(t.attackTimer<=0){
+
+   enemyAttack(t);
+
+   t.attackTimer=
+    Math.max(45,130-level*8)+Math.random()*80;
+  }
+ });
+
+ particles.forEach((p,i)=>{
+
+  p.x+=p.vx;
+  p.y+=p.vy;
+  p.vx*=.95;
+  p.vy*=.95;
+  p.life--;
+
+  if(p.life<=0)
+   particles.splice(i,1);
+ });
+
+ updateScope();
+}
+
+function draw(){
+
+ drawBackground();
+
+ targets.forEach(drawTarget);
+
+ particles.forEach(p=>{
+
+  ctx.globalAlpha=p.life/55;
+  ctx.fillStyle="#ef4444";
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,3,0,Math.PI*2);
+  ctx.fill();
+
+ });
+
+ ctx.globalAlpha=1;
+
+ if(!zoomed){
+
+  ctx.strokeStyle="#ffffffdf";
+  ctx.lineWidth=2;
+
+  ctx.beginPath();
+
+  ctx.arc(aim.x,aim.y,16,0,Math.PI*2);
+
+  ctx.moveTo(aim.x-28,aim.y);
+  ctx.lineTo(aim.x-7,aim.y);
+
+  ctx.moveTo(aim.x+7,aim.y);
+  ctx.lineTo(aim.x+28,aim.y);
+
+  ctx.moveTo(aim.x,aim.y-28);
+  ctx.lineTo(aim.x,aim.y-7);
+
+  ctx.moveTo(aim.x,aim.y+7);
+  ctx.lineTo(aim.x,aim.y+28);
+
+  ctx.stroke();
+ }
+
+ if(muzzle>.1){
+
+  ctx.fillStyle="#ffd75add";
+
+  ctx.beginPath();
+  ctx.moveTo(aim.x,aim.y);
+  ctx.lineTo(aim.x+34,aim.y-17);
+  ctx.lineTo(aim.x+22,aim.y);
+  ctx.lineTo(aim.x+34,aim.y+17);
+  ctx.closePath();
+  ctx.fill();
+ }
+
+ const v=ctx.createRadialGradient(
+  W/2,H/2,100,
+  W/2,H/2,Math.max(W,H)*.75
+ );
+
+ v.addColorStop(0,"transparent");
+ v.addColorStop(1,"#000000a8");
+
+ ctx.fillStyle=v;
+ ctx.fillRect(0,0,W,H);
+}
+
+function hudUpdate(){
+
+ document.getElementById("levelNum").textContent=level;
+
+ document.getElementById("targetCount").textContent=
+  targets.filter(t=>t.alive).length;
+
+ document.getElementById("score").textContent=score;
+
+ document.getElementById("ammo").textContent=
+  ammo+" / "+reserve;
+
+ document.getElementById("healthText").textContent=
+  Math.ceil(playerHealth);
+
+ document.getElementById("health").style.width=
+  playerHealth+"%";
+
+ const health=document.getElementById("health");
+
+ if(playerHealth<=30)
+  health.style.background="#ef4444";
+ else if(playerHealth<=60)
+  health.style.background="#f59e0b";
+ else
+  health.style.background="#36d36b";
+
+ const timer=document.getElementById("timer");
+
+ timer.textContent=Math.ceil(timeLeft);
+
+ if(timeLeft<=10)
+  timer.classList.add("danger");
+ else
+  timer.classList.remove("danger");
+}
+
+function startTimer(){
+
+ clearInterval(timerID);
+
+ timerID=setInterval(()=>{
+
+  if(!running)return;
+
+  timeLeft--;
+
+  hudUpdate();
+
+  if(timeLeft<=0){
+
+   clearInterval(timerID);
+   missionFailed();
+
+  }
+
+ },1000);
+}
+
+function nextLevel(){
+
+ if(!running)return;
+
+ level++;
+
+ const d=difficulty();
+
+ timeLeft=d.time;
+
+ ammo=5;
+ reserve=20+level*5;
+
+ createTargets();
+
+ document.getElementById("objective").textContent=
+  "🔥 Level "+level+" — Difficulty increased";
+
+ hudUpdate();
+
+ showHit("LEVEL "+level);
+}
+
+function missionFailed(){
+
+ running=false;
+ clearInterval(timerID);
+
+ endMission("💀 MISSION FAILED");
+}
+
+function endMission(title){
+
+ const accuracy=shots
+  ?Math.round(hits/shots*100)
+  :0;
+
+ let best=Number(
+  localStorage.getItem("nightfallBest")||0
+ );
+
+ if(score>best){
+
+  best=score;
+
+  localStorage.setItem(
+   "nightfallBest",
+   best
+  );
+ }
+
+ document.getElementById("endTitle").textContent=title;
+ document.getElementById("finalLevel").textContent=level;
+ document.getElementById("finalScore").textContent=score;
+ document.getElementById("accuracy").textContent=accuracy+"%";
+ document.getElementById("bestScore").textContent=best;
+
+ document.getElementById("endScreen").style.display="flex";
+}
+
+function startGame(){
+
+ startAudio();
+
+ clearInterval(timerID);
+
+ level=1;
+ score=0;
+ shots=0;
+ hits=0;
+ combo=0;
+
+ ammo=5;
+ reserve=25;
+ playerHealth=100;
+ timeLeft=45;
+
+ zoomed=false;
+
+ createTargets();
+
+ running=true;
+
+ document.getElementById("startScreen").style.display="none";
+ document.getElementById("endScreen").style.display="none";
+ document.getElementById("scope").style.display="none";
+
+ hudUpdate();
+ startTimer();
+
+ requestAnimationFrame(loop);
+}
+
+function loop(){
+
+ if(!running)return;
+
+ update();
+ draw();
+
+ requestAnimationFrame(loop);
+}
+
+canvas.addEventListener("mousemove",e=>{
+ aim.x=e.clientX;
+ aim.y=e.clientY;
+ updateScope();
+});
+
+canvas.addEventListener("pointermove",e=>{
+
+ if(e.pointerType==="touch"){
+
+  aim.x=e.clientX;
+  aim.y=e.clientY;
+
+  updateScope();
+ }
+});
+
+canvas.addEventListener("mousedown",e=>{
+
+ if(e.button===0)
+  shoot();
+});
+
+document.getElementById("fire").addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ shoot();
+});
+
+document.getElementById("zoom").addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ toggleZoom();
+});
+
+document.getElementById("reload").addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ reload();
+});
+
+addEventListener("keydown",e=>{
+
+ if(e.code==="Space")shoot();
+
+ if(e.key.toLowerCase()==="z")
+  toggleZoom();
+
+ if(e.key.toLowerCase()==="r")
+  reload();
+});
+
+document.getElementById("startBtn").onclick=startGame;
+document.getElementById("again").onclick=startGame;
+
+drawBackground();
+</script>
+
+</body>
+</html>

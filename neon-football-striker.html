@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Football Striker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            outline: none;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            padding: 10px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 0 5px;
+        }
+
+        .hud-box {
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.4);
+            padding: 4px 10px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        .hud-label {
+            font-size: 8px;
+            color: #93c5fd;
+            letter-spacing: 1px;
+        }
+
+        .hud-value {
+            font-size: 14px;
+            font-weight: 900;
+            color: #00f2fe;
+        }
+
+        h1 {
+            font-size: 15px;
+            background: linear-gradient(45deg, #00f2fe, #ff007f);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+        }
+
+        canvas {
+            background: #060913;
+            border-radius: 16px;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 242, 254, 0.25);
+            border: 2px solid rgba(0, 242, 254, 0.4);
+            display: block;
+            margin: 0 auto;
+            touch-action: none;
+        }
+
+        .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            padding: 0 5px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 0, 127, 0.4);
+            color: #ff007f;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+        }
+
+        .overlay {
+            position: absolute;
+            inset: 10px;
+            background: rgba(2, 6, 23, 0.94);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            text-align: center;
+            padding: 20px;
+            border: 1px solid rgba(0, 242, 254, 0.3);
+        }
+
+        .overlay h2 {
+            font-size: 28px;
+            background: linear-gradient(45deg, #fff, #00f2fe);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .overlay p {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 35px;
+            font-size: 14px;
+            color: #05070c;
+            background: linear-gradient(45deg, #00f2fe, #ff007f);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.6);
+            transition: 0.2s;
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .hide { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <header>
+            <div class="hud-box">
+                <div class="hud-label">SCORE</div>
+                <div class="hud-value" id="score">0</div>
+            </div>
+            <div>
+                <h1>NEON STRIKER</h1>
+                <div style="font-size: 7px; color: #ff007f; text-align: center; letter-spacing: 2px;">AIM • STRIKE • SCORE</div>
+            </div>
+            <div class="hud-box">
+                <div class="hud-label">LEVEL</div>
+                <div class="hud-value" id="level">1</div>
+            </div>
+        </header>
+
+        <canvas id="gameCanvas" width="400" height="520"></canvas>
+
+        <div class="bottom-nav">
+            <div class="control-btn" id="sound-btn" onclick="toggleSound()">SOUND: ON</div>
+            <div style="font-size: 9px; color: #64748b;">NEON CUP 2026</div>
+            <div class="control-btn" onclick="resetGame()">RESTART</div>
+        </div>
+
+        <!-- Overlays -->
+        <div id="start-screen" class="overlay">
+            <h2>NEON FOOTBALL</h2>
+            <p>Slide your cyber striker paddle to smash the glowing ball into the neon goal. Avoid missing and clear levels!</p>
+            <button class="btn" onclick="startGame()">KICK OFF</button>
+        </div>
+
+        <div id="game-over-screen" class="overlay hide">
+            <h2 style="background: linear-gradient(45deg, #ff0055, #ffb199); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GAME OVER</h2>
+            <p>Final Score: <span id="final-score" style="color: #00f2fe; font-weight: bold;">0</span></p>
+            <button class="btn" onclick="startGame()">TRY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const levelEl = document.getElementById('level');
+        const finalScoreEl = document.getElementById('final-score');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const soundBtn = document.getElementById('sound-btn');
+
+        let score = 0;
+        let level = 1;
+        let isPlaying = false;
+        let soundEnabled = true;
+        let particles = [];
+        let screenShake = 0;
+
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'hit') {
+                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.04);
+            } else if (type === 'goal') {
+                osc.frequency.setValueAtTime(350, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } else if (type === 'gameover') {
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(70, audioCtx.currentTime + 0.35);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.35);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            soundBtn.innerText = `SOUND: ${soundEnabled ? 'ON' : 'OFF'}`;
+            if (soundEnabled) initAudio();
+        }
+
+        // Game Objects
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 12,
+            speedX: 3,
+            speedY: -5,
+            color: '#00f2fe'
+        };
+
+        let paddle = {
+            width: 110,
+            height: 16,
+            x: canvas.width / 2 - 55,
+            y: canvas.height - 50,
+            color: '#ff007f',
+            targetX: canvas.width / 2 - 55
+        };
+
+        // Neon Bumpers / Obstacles (Inspired by your image)
+        let bumpers = [
+            { x: 70, y: 160, width: 70, height: 14, color: '#00f2fe' },
+            { x: 260, y: 160, width: 70, height: 14, color: '#ff007f' },
+            { x: 120, y: 240, width: 80, height: 14, color: '#ff007f' },
+            { x: 220, y: 240, width: 80, height: 14, color: '#00f2fe' }
+        ];
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                let angle = Math.random() * Math.PI * 2;
+                let speed = Math.random() * 5 + 1;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.life = 1;
+                this.decay = Math.random() * 0.03 + 0.02;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 15; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        // Input Handlers
+        function handleInput(clientX) {
+            let rect = canvas.getBoundingClientRect();
+            paddle.targetX = clientX - rect.left - paddle.width / 2;
+        }
+
+        window.addEventListener('mousemove', e => { if (isPlaying) handleInput(e.clientX); });
+        window.addEventListener('touchmove', e => { if (isPlaying) handleInput(e.touches[0].clientX); }, {passive: true});
+
+        window.addEventListener('keydown', e => {
+            if (!isPlaying) return;
+            if (e.key === 'ArrowLeft') paddle.targetX -= 35;
+            if (e.key === 'ArrowRight') paddle.targetX += 35;
+        });
+
+        function startGame() {
+            initAudio();
+            startScreen.classList.add('hide');
+            gameOverScreen.classList.add('hide');
+            score = 0;
+            level = 1;
+            scoreEl.innerText = score;
+            levelEl.innerText = level;
+            particles = [];
+            resetBall();
+            isPlaying = true;
+        }
+
+        function resetGame() {
+            startScreen.classList.remove('hide');
+            gameOverScreen.classList.add('hide');
+            isPlaying = false;
+        }
+
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2 + 30;
+            let speedMultiplier = 1 + (level - 1) * 0.15;
+            let angle = (Math.random() - 0.5) * 1.0;
+            ball.speedX = Math.sin(angle) * (5 * speedMultiplier);
+            ball.speedY = -Math.cos(angle) * (5 * speedMultiplier);
+        }
+
+        function update() {
+            if (!isPlaying) return;
+
+            // Smooth paddle movement
+            paddle.x += (paddle.targetX - paddle.x) * 0.25;
+            if (paddle.x < 10) paddle.x = 10;
+            if (paddle.x + paddle.width > canvas.width - 10) paddle.x = canvas.width - 10 - paddle.width;
+
+            // Ball movement
+            ball.x += ball.speedX;
+            ball.y += ball.speedY;
+
+            // Wall collisions (Left/Right)
+            if (ball.x - ball.radius < 10 || ball.x + ball.radius > canvas.width - 10) {
+                ball.speedX = -ball.speedX;
+                playSound('hit');
+                createParticles(ball.x, ball.y, '#00f2fe');
+            }
+
+            // Goalpost Collision (Top)
+            let goalLeft = canvas.width / 2 - 75;
+            let goalRight = canvas.width / 2 + 75;
+            if (ball.y - ball.radius < 35) {
+                if (ball.x >= goalLeft && ball.x <= goalRight) {
+                    // GOAL SCORED!
+                    score += 100 * level;
+                    scoreEl.innerText = score;
+                    screenShake = 15;
+                    playSound('goal');
+                    createParticles(ball.x, ball.y, '#00f2fe');
+
+                    // Level Up every 300 points
+                    level = Math.floor(score / 300) + 1;
+                    levelEl.innerText = level;
+                    resetBall();
+                } else {
+                    ball.speedY = -ball.speedY;
+                    playSound('hit');
+                    createParticles(ball.x, ball.y, '#ff007f');
+                }
+            }
+
+            // Bumpers Collision
+            bumpers.forEach(b => {
+                if (
+                    ball.x > b.x && ball.x < b.x + b.width &&
+                    ball.y > b.y && ball.y < b.y + b.height
+                ) {
+                    ball.speedY = -ball.speedY;
+                    playSound('hit');
+                    createParticles(ball.x, ball.y, b.color);
+                }
+            });
+
+            // Paddle Collision
+            if (
+                ball.y + ball.radius >= paddle.y &&
+                ball.y - ball.radius <= paddle.y + paddle.height &&
+                ball.x >= paddle.x &&
+                ball.x <= paddle.x + paddle.width
+            ) {
+                ball.speedY = -Math.abs(ball.speedY);
+                let hitOffset = ball.x - (paddle.x + paddle.width / 2);
+                ball.speedX = hitOffset * 0.2;
+                playSound('hit');
+                createParticles(ball.x, ball.y, '#ff007f');
+            }
+
+            // Bottom Miss (Game Over)
+            if (ball.y > canvas.height) {
+                isPlaying = false;
+                playSound('gameover');
+                finalScoreEl.innerText = score;
+                gameOverScreen.classList.remove('hide');
+            }
+
+            // Particles update
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                if (particles[i].life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function draw() {
+            ctx.save();
+
+            if (screenShake > 0) {
+                let shakeX = (Math.random() - 0.5) * screenShake;
+                let shakeY = (Math.random() - 0.5) * screenShake;
+                ctx.translate(shakeX, shakeY);
+                screenShake *= 0.85;
+                if (screenShake < 0.5) screenShake = 0;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Field Borders (Side Ramps look)
+            ctx.strokeStyle = 'rgba(0, 242, 254, 0.3)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(10, 35);
+            ctx.lineTo(10, canvas.height - 10);
+            ctx.lineTo(canvas.width - 10, canvas.height - 10);
+            ctx.lineTo(canvas.width - 10, 35);
+            ctx.stroke();
+
+            // Center Football Circle & Line
+            ctx.strokeStyle = 'rgba(0, 242, 254, 0.15)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(10, canvas.height / 2);
+            ctx.lineTo(canvas.width - 10, canvas.height / 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 55, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Goalpost Top
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = '#00f2fe';
+            ctx.strokeStyle = '#00f2fe';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2 - 75, 10);
+            ctx.lineTo(canvas.width / 2 - 75, 35);
+            ctx.lineTo(canvas.width / 2 + 75, 35);
+            ctx.lineTo(canvas.width / 2 + 75, 10);
+            ctx.stroke();
+
+            // Draw Bumpers
+            bumpers.forEach(b => {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = b.color;
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x, b.y, b.width, b.height);
+            });
+
+            // Draw Ball (Glowing Football)
+            ctx.shadowColor = ball.color;
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = ball.color;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw Paddle (Striker)
+            ctx.shadowColor = paddle.color;
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = paddle.color;
+            ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+
+            // Draw Particles
+            particles.forEach(p => p.draw());
+
+            ctx.restore();
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+</html>

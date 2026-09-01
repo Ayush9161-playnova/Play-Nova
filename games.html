@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PlayNova - Games</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<header class="page-header">
+
+    <nav class="navbar">
+
+        <div class="logo">PlayNova</div>
+
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="games.html">Games</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+
+        <div class="nav-right">
+
+            <a href="profile.html" class="btn">
+                Profile
+            </a>
+
+            <div class="menu-btn">
+                ☰
+            </div>
+
+        </div>
+
+    </nav>
+
+</header>
+
+
+<!-- ================= GAMES HEADER ================= -->
+
+<section style="padding:100px 8% 40px;">
+
+    <h1 style="text-align:center;font-size:45px;">
+        🎮 All Games
+    </h1>
+
+    <p style="text-align:center;color:#cbd5e1;">
+        Choose your favorite game and start playing.
+    </p>
+
+</section>
+
+
+<!-- ================= SEARCH ================= -->
+
+<div class="search-section">
+
+    <input
+        type="search"
+        id="searchBox"
+        placeholder="🔍 Search Games..."
+        autocomplete="off"
+    >
+
+</div>
+
+
+<!-- ================= FILTER ================= -->
+
+<div class="game-filter">
+
+    <button
+        class="filter-btn active"
+        data-filter="all">
+        All
+    </button>
+
+    <button
+        class="filter-btn"
+        data-filter="racing">
+        🏎️ Racing
+    </button>
+
+    <button
+        class="filter-btn"
+        data-filter="action">
+        🔫 Action
+    </button>
+
+    <button
+        class="filter-btn"
+        data-filter="puzzle">
+        🧩 Puzzle
+    </button>
+
+    <button
+        class="filter-btn"
+        data-filter="sports">
+        ⚽ Sports
+    </button>
+
+</div>
+
+
+<!-- ================= GAMES ================= -->
+
+<section id="games">
+
+    <div id="gamesContainer">
+
+
+        <!-- CAR RACING -->
+
+        <div class="game-card racing">
+
+            <img
+                src="images/car-racing.jpg"
+                alt="Car Racing"
+            >
+
+            <div class="card-body">
+
+                <h3>🏎️ Car Racing</h3>
+
+                <p>
+                    High Speed Racing Adventure
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="car-racing.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- NEON RUSH X -->
+
+        <div class="game-card racing">
+
+            <img
+                src="images/neon-rush-x.jpg"
+                alt="Neon Rush X"
+            >
+
+            <div class="card-body">
+
+                <h3>🏎️ Neon Rush X</h3>
+
+                <p>
+                    High-speed traffic racing with Nitro,
+                    Coins & Levels.
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="neon-rush-x.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- NEON BIKE -->
+
+        <div class="game-card racing">
+
+            <img
+                src="images/neon-bike.jpg"
+                alt="Neon Bike Racing"
+            >
+
+            <div class="card-body">
+
+                <h3>🏍️ Neon Bike Racing</h3>
+
+                <p>
+                    High-Speed Stunt Game
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="neon-bike.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- BIKE RACING -->
+
+        <div class="game-card racing">
+
+            <img
+                src="images/bike-racing.jpg"
+                alt="Bike Racing"
+            >
+
+            <div class="card-body">
+
+                <h3>🏍️ Bike Racing</h3>
+
+                <p>
+                    Extreme Bike Racing
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="bike-racing.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTION GAME -->
+
+        <div class="game-card action">
+
+            <img
+                src="images/action-game.jpg"
+                alt="Action Game"
+            >
+
+            <div class="card-body">
+
+                <h3>🔫 Action Game</h3>
+
+                <p>
+                    Fight and Survive
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="action-game.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SNIPER MISSION -->
+
+        <div class="game-card action">
+
+            <img
+                src="images/sniper-mission.jpg"
+                alt="Sniper Mission"
+            >
+
+            <div class="card-body">
+
+                <h3>🎯 Sniper Mission</h3>
+
+                <p>
+                    Complete Secret Missions
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="sniper-mission.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ZOMBIE SURVIVAL -->
+
+        <div class="game-card action">
+
+            <img
+                src="images/zombie-survival.jpg"
+                alt="Zombie Survival"
+            >
+
+            <div class="card-body">
+
+                <h3>🧟 Zombie Survival</h3>
+
+                <p>
+                    Survive the zombies
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="zombie-survival.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PUZZLE -->
+
+        <div class="game-card puzzle">
+
+            <img
+                src="images/puzzle-game.jpg"
+                alt="Puzzle Game"
+            >
+
+            <div class="card-body">
+
+                <h3>🧩 Puzzle Game</h3>
+
+                <p>
+                    Train Your Brain
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="puzzle-game.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHESS -->
+
+        <div class="game-card puzzle">
+
+            <img
+                src="images/chess.jpg"
+                alt="Chess"
+            >
+
+            <div class="card-body">
+
+                <h3>♟️ Chess</h3>
+
+                <p>
+                    Play with Smart AI
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="chess.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- 2048 -->
+
+        <div class="game-card puzzle">
+
+            <img
+                src="images/neon-2048.jpg"
+                alt="2048"
+            >
+
+            <div class="card-body">
+
+                <h3>🧩 2048</h3>
+
+                <p>
+                    Train Your Brain
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="neon-2048.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PENALTY TOURNAMENT -->
+
+        <div class="game-card sports">
+
+            <img
+                src="images/sports-game.jpg"
+                alt="Pro Penalty Tournament"
+            >
+
+            <div class="card-body">
+
+                <h3>⚽ Pro Penalty Tournament 2026</h3>
+
+                <p>
+                    Become a Champion
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="pro-penalty-tournament-2026.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- NEON FOOTBALL -->
+
+        <div class="game-card sports">
+
+            <img
+                src="images/neon-football-striker.jpg"
+                alt="Neon Football Striker"
+            >
+
+            <div class="card-body">
+
+                <h3>⚽ Neon Football Striker</h3>
+
+                <p>
+                    Score & Reach Levels
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="neon-football-striker.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- BASKETBALL -->
+
+        <div class="game-card sports">
+
+            <img
+                src="images/basketball.jpg"
+                alt="Pro Basketball Tournament"
+            >
+
+            <div class="card-body">
+
+                <h3>🏀 Pro Basketball Tournament 2026</h3>
+
+                <p>
+                    Score Amazing Shots
+                </p>
+
+                <div class="card-footer-actions">
+
+                    <a
+                        href="pro-basketball-tournament-2026.html"
+                        class="btn play-now-link">
+                        Play Now
+                    </a>
+
+                    <button
+                        class="favorite-btn"
+                        type="button"
+                        title="Add to Favorites">
+                        ♡
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <p>
+        © 2026 PlayNova. All Rights Reserved.
+    </p>
+
+</footer>
+
+
+<script src="games.js"></script>
+
+</body>
+</html>

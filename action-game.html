@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>PlayNova - Action Strike</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  background:#151515;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  overflow:hidden;
+  touch-action:none;
+}
+
+#game{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  background:
+    linear-gradient(#58615e 0%,#3c4541 38%,#292d2a 100%);
+}
+
+/* SKY */
+
+.sky{
+  position:absolute;
+  inset:0 0 55% 0;
+  background:
+    linear-gradient(#7b8883,#9a9d91 55%,#686b61);
+}
+
+.cloud{
+  position:absolute;
+  width:170px;
+  height:35px;
+  background:#c6c8c0;
+  border-radius:50%;
+  opacity:.35;
+}
+
+.cloud:before,
+.cloud:after{
+  content:"";
+  position:absolute;
+  background:#c6c8c0;
+  border-radius:50%;
+}
+
+.cloud:before{
+  width:65px;
+  height:65px;
+  left:25px;
+  top:-30px;
+}
+
+.cloud:after{
+  width:75px;
+  height:75px;
+  right:20px;
+  top:-40px;
+}
+
+/* BATTLEFIELD */
+
+.ground{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:57%;
+  background:
+    radial-gradient(circle at 20% 30%,#55584d 0 2px,transparent 3px),
+    radial-gradient(circle at 70% 60%,#3f4239 0 3px,transparent 4px),
+    linear-gradient(145deg,#45483e,#252823);
+  background-size:110px 90px,140px 110px,100% 100%;
+}
+
+/* BUILDINGS */
+
+.building{
+  position:absolute;
+  bottom:43%;
+  background:linear-gradient(90deg,#252827,#454642,#222524);
+  border:2px solid #202220;
+  box-shadow:0 8px 20px #0007;
+}
+
+.building:after{
+  content:"";
+  position:absolute;
+  inset:12px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #1c2726 0 18px,
+      #9b8257 19px 25px
+    );
+  opacity:.55;
+}
+
+.b1{
+  width:145px;
+  height:210px;
+  left:3%;
+}
+
+.b2{
+  width:180px;
+  height:160px;
+  right:2%;
+}
+
+.b3{
+  width:120px;
+  height:130px;
+  left:35%;
+}
+
+/* ROAD */
+
+.road{
+  position:absolute;
+  left:22%;
+  right:22%;
+  top:43%;
+  bottom:0;
+  background:
+    linear-gradient(
+      90deg,
+      #252525,
+      #3b3b3b 8%,
+      #292929 50%,
+      #3b3b3b 92%,
+      #242424
+    );
+  clip-path:polygon(
+    27% 0,
+    73% 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+.roadLine{
+  position:absolute;
+  width:7px;
+  height:80px;
+  background:#d7c97d;
+  border-radius:5px;
+  left:50%;
+}
+
+/* STREET LIGHTS */
+
+.streetLight{
+  position:absolute;
+  bottom:0;
+  width:8px;
+  height:42%;
+  background:#181818;
+  z-index:5;
+}
+
+.streetLight:before{
+  content:"";
+  position:absolute;
+  top:-6px;
+  left:-10px;
+  width:28px;
+  height:8px;
+  background:#202020;
+  border-radius:5px;
+}
+
+.streetLight:after{
+  content:"";
+  position:absolute;
+  top:-14px;
+  left:-4px;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#fff2a0;
+  box-shadow:0 0 18px #ffe98a;
+}
+
+.light1{left:13%}
+.light2{left:25%}
+.light3{right:25%}
+.light4{right:13%}
+
+/* BARRELS */
+
+.barrel{
+  position:absolute;
+  width:35px;
+  height:48px;
+  background:linear-gradient(90deg,#26382d,#58725b,#26382d);
+  border:2px solid #18221b;
+  border-radius:8px;
+  bottom:14%;
+  z-index:8;
+}
+
+.barrel:before,
+.barrel:after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  height:5px;
+  background:#172018;
+}
+
+.barrel:before{top:9px}
+.barrel:after{bottom:9px}
+
+/* HUD */
+
+#hud{
+  position:absolute;
+  z-index:50;
+  top:12px;
+  left:12px;
+  right:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  pointer-events:none;
+}
+
+.panel{
+  background:#111a15dd;
+  border:1px solid #748375;
+  border-radius:10px;
+  padding:8px 12px;
+  box-shadow:0 5px 15px #0008;
+}
+
+.health{
+  width:190px;
+}
+
+.healthTitle{
+  font-size:11px;
+  color:#d7d7d7;
+  margin-bottom:5px;
+}
+
+.healthBar{
+  height:12px;
+  background:#292929;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+#healthFill{
+  height:100%;
+  width:100%;
+  background:#4cae57;
+  transition:.15s;
+}
+
+.ammo{
+  font-size:17px;
+  font-weight:bold;
+}
+
+#ammo{
+  color:#e4d18a;
+}
+
+/* MISSION */
+
+#mission{
+  position:absolute;
+  z-index:50;
+  top:92px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#111a15d9;
+  border:1px solid #7b887a;
+  padding:8px 16px;
+  border-radius:20px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+/* CROSSHAIR */
+
+#crosshair{
+  position:absolute;
+  z-index:40;
+  left:50%;
+  top:48%;
+  width:40px;
+  height:40px;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+
+#crosshair:before,
+#crosshair:after{
+  content:"";
+  position:absolute;
+  background:#eee;
+}
+
+#crosshair:before{
+  width:40px;
+  height:2px;
+  top:19px;
+}
+
+#crosshair:after{
+  width:2px;
+  height:40px;
+  left:19px;
+}
+
+/* PLAYER */
+
+#player{
+  position:absolute;
+  z-index:30;
+  width:115px;
+  height:210px;
+  left:50%;
+  bottom:20px;
+  transform:translateX(-50%);
+}
+
+/* shadow */
+
+.playerShadow{
+  position:absolute;
+  width:100px;
+  height:25px;
+  bottom:0;
+  left:8px;
+  background:#0008;
+  border-radius:50%;
+}
+
+/* legs */
+
+.leg{
+  position:absolute;
+  bottom:15px;
+  width:28px;
+  height:82px;
+  background:linear-gradient(90deg,#202820,#39483a,#1d251e);
+  border-radius:12px;
+}
+
+.leg.left{left:30px}
+.leg.right{right:30px}
+
+.boot{
+  position:absolute;
+  bottom:5px;
+  width:40px;
+  height:22px;
+  background:#111;
+  border-radius:6px 12px 5px 5px;
+}
+
+.boot.left{left:18px}
+.boot.right{right:18px}
+
+/* torso */
+
+.torso{
+  position:absolute;
+  left:23px;
+  top:68px;
+  width:69px;
+  height:95px;
+  border-radius:20px 20px 13px 13px;
+  background:
+    linear-gradient(90deg,#202a21,#465445,#222c22);
+  border:2px solid #111711;
+}
+
+.plate{
+  position:absolute;
+  left:14px;
+  right:14px;
+  top:15px;
+  height:46px;
+  border-radius:8px;
+  background:#303b31;
+  border:2px solid #687468;
+}
+
+.pouch{
+  position:absolute;
+  width:18px;
+  height:22px;
+  bottom:9px;
+  background:#20291f;
+  border:1px solid #687063;
+  border-radius:4px;
+}
+
+.p1{left:7px}
+.p2{right:7px}
+
+/* head */
+
+.head{
+  position:absolute;
+  left:38px;
+  top:30px;
+  width:40px;
+  height:50px;
+  background:#9b7357;
+  border-radius:15px 15px 18px 18px;
+  z-index:3;
+}
+
+.face{
+  position:absolute;
+  inset:15px 5px 5px;
+  background:#a77d60;
+  border-radius:12px;
+}
+
+/* helmet */
+
+.helmet{
+  position:absolute;
+  z-index:6;
+  left:31px;
+  top:13px;
+  width:54px;
+  height:38px;
+  background:linear-gradient(#4d5d4d,#202a21);
+  border-radius:30px 30px 9px 9px;
+  border:2px solid #111711;
+}
+
+.helmetBand{
+  position:absolute;
+  left:4px;
+  right:4px;
+  bottom:7px;
+  height:7px;
+  background:#172018;
+  border-radius:4px;
+}
+
+/* arms */
+
+.arm{
+  position:absolute;
+  top:78px;
+  width:25px;
+  height:80px;
+  background:linear-gradient(90deg,#252e25,#4b5849,#202820);
+  border-radius:15px;
+  transform-origin:top center;
+}
+
+.arm.left{
+  left:12px;
+  transform:rotate(20deg);
+}
+
+.arm.right{
+  right:12px;
+  transform:rotate(-20deg);
+}
+
+/* rifle */
+
+.rifle{
+  position:absolute;
+  z-index:8;
+  width:100px;
+  height:13px;
+  background:#151715;
+  border-radius:5px;
+  top:106px;
+  left:15px;
+  transform:rotate(-12deg);
+  box-shadow:0 2px 3px #000;
+}
+
+.rifle:before{
+  content:"";
+  position:absolute;
+  width:38px;
+  height:8px;
+  background:#252a25;
+  left:15px;
+  top:12px;
+}
+
+.rifle:after{
+  content:"";
+  position:absolute;
+  width:35px;
+  height:4px;
+  background:#080908;
+  right:-30px;
+  top:4px;
+}
+
+/* ENEMY */
+
+.enemy{
+  position:absolute;
+  z-index:25;
+  width:78px;
+  height:125px;
+  filter:drop-shadow(0 8px 6px #0009);
+}
+
+.enemyBody{
+  position:absolute;
+  left:14px;
+  top:38px;
+  width:50px;
+  height:67px;
+  border-radius:15px;
+  background:linear-gradient(90deg,#292c29,#555852,#292c29);
+  border:2px solid #171817;
+}
+
+.enemyHead{
+  position:absolute;
+  left:25px;
+  top:15px;
+  width:30px;
+  height:35px;
+  border-radius:50%;
+  background:#8a6650;
+  z-index:3;
+}
+
+.enemyHelmet{
+  position:absolute;
+  left:20px;
+  top:8px;
+  width:41px;
+  height:25px;
+  border-radius:20px 20px 5px 5px;
+  background:#353d34;
+  z-index:5;
+}
+
+.enemyArm{
+  position:absolute;
+  width:17px;
+  height:55px;
+  top:47px;
+  background:#343934;
+  border-radius:12px;
+}
+
+.enemyArm.left{
+  left:4px;
+  transform:rotate(22deg);
+}
+
+.enemyArm.right{
+  right:4px;
+  transform:rotate(-22deg);
+}
+
+.enemyGun{
+  position:absolute;
+  width:60px;
+  height:8px;
+  background:#141614;
+  left:10px;
+  top:65px;
+  transform:rotate(-10deg);
+  z-index:8;
+}
+
+/* BULLET */
+
+.bullet{
+  position:absolute;
+  width:5px;
+  height:18px;
+  background:#ffe7a0;
+  box-shadow:0 0 8px #ffcc55;
+  border-radius:4px;
+  z-index:35;
+}
+
+/* ENEMY BULLET */
+
+.enemyBullet{
+  position:absolute;
+  width:5px;
+  height:16px;
+  background:#ff795f;
+  box-shadow:0 0 8px #ff4325;
+  z-index:34;
+}
+
+/* EXPLOSION */
+
+.explosion{
+  position:absolute;
+  z-index:60;
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,
+    #fff 0 8%,
+    #ffd22e 9% 28%,
+    #ff701e 29% 55%,
+    #b31d08 56% 70%,
+    transparent 71%);
+  animation:explode .3s forwards;
+  pointer-events:none;
+}
+
+@keyframes explode{
+  from{transform:scale(.3);opacity:1}
+  to{transform:scale(1.8);opacity:0}
+}
+
+/* MUZZLE FLASH */
+
+.muzzle{
+  position:absolute;
+  z-index:70;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  background:radial-gradient(circle,#fff,#ffb52b,#ff5b00,transparent 70%);
+  animation:flash .08s forwards;
+}
+
+@keyframes flash{
+  to{opacity:0;transform:scale(1.7)}
+}
+
+/* CONTROLS */
+
+.controls{
+  position:absolute;
+  z-index:80;
+  left:15px;
+  right:15px;
+  bottom:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+}
+
+.moveControls{
+  display:flex;
+  gap:10px;
+}
+
+.btn{
+  width:62px;
+  height:62px;
+  border-radius:50%;
+  border:2px solid #a9b3a8;
+  background:#151b17dd;
+  color:#fff;
+  font-size:25px;
+  box-shadow:0 6px 15px #0009;
+}
+
+.btn:active{
+  background:#526052;
+}
+
+.fire{
+  width:76px;
+  height:76px;
+  background:#71251d;
+  border-color:#e9a28b;
+  font-size:30px;
+}
+
+/* START / GAME OVER */
+
+.screen{
+  position:absolute;
+  z-index:200;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#070a08cc;
+  backdrop-filter:blur(3px);
+}
+
+.card{
+  width:min(390px,90%);
+  padding:30px 25px;
+  text-align:center;
+  border-radius:18px;
+  background:linear-gradient(145deg,#202820,#111611);
+  border:1px solid #7c897a;
+  box-shadow:0 20px 50px #000;
+}
+
+.card h1{
+  font-size:34px;
+  margin-bottom:10px;
+}
+
+.card h1 span{
+  color:#c9b56b;
+}
+
+.card p{
+  color:#b7beb5;
+  line-height:1.6;
+  font-size:14px;
+  margin-bottom:22px;
+}
+
+.start{
+  padding:14px 35px;
+  border:0;
+  border-radius:9px;
+  background:linear-gradient(#c9b56b,#8e783d);
+  color:#17140b;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.hidden{
+  display:none;
+}
+
+/* DAMAGE FLASH */
+
+#damage{
+  position:absolute;
+  inset:0;
+  z-index:150;
+  pointer-events:none;
+  background:#b30000;
+  opacity:0;
+}
+
+.damageFlash{
+  animation:damage .2s;
+}
+
+@keyframes damage{
+  0%{opacity:.5}
+  100%{opacity:0}
+}
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+  #mission{
+    top:88px;
+    font-size:10px;
+  }
+
+  .health{
+    width:145px;
+  }
+
+  .panel{
+    padding:7px 9px;
+  }
+
+  .building{
+    transform:scale(.8);
+    transform-origin:bottom;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+  <div class="sky">
+    <div class="cloud" style="left:10%;top:18%"></div>
+    <div class="cloud" style="right:15%;top:30%"></div>
+  </div>
+
+  <div class="ground"></div>
+
+  <div class="building b1"></div>
+  <div class="building b2"></div>
+  <div class="building b3"></div>
+
+  <div class="road">
+    <div class="roadLine" id="line1"></div>
+    <div class="roadLine" id="line2" style="top:35%"></div>
+    <div class="roadLine" id="line3" style="top:70%"></div>
+  </div>
+
+  <!-- STREET LIGHTS -->
+
+  <div class="streetLight light1"></div>
+  <div class="streetLight light2"></div>
+  <div class="streetLight light3"></div>
+  <div class="streetLight light4"></div>
+
+  <!-- BARRELS -->
+
+  <div class="barrel" style="left:7%"></div>
+  <div class="barrel" style="right:7%"></div>
+
+  <!-- HUD -->
+
+  <div id="hud">
+
+    <div class="panel health">
+      <div class="healthTitle">HEALTH</div>
+      <div class="healthBar">
+        <div id="healthFill"></div>
+      </div>
+    </div>
+
+    <div class="panel ammo">
+      🔫 <span id="ammo">30</span> / 120
+    </div>
+
+  </div>
+
+  <div id="mission">
+    🎯 Mission: Eliminate <b id="kills">0</b> / 15 enemies
+  </div>
+
+  <div id="crosshair"></div>
+
+  <!-- PLAYER -->
+
+  <div id="player">
+
+    <div class="playerShadow"></div>
+
+    <div class="leg left"></div>
+    <div class="leg right"></div>
+
+    <div class="boot left"></div>
+    <div class="boot right"></div>
+
+    <div class="torso">
+      <div class="plate"></div>
+      <div class="pouch p1"></div>
+      <div class="pouch p2"></div>
+    </div>
+
+    <div class="head">
+      <div class="face"></div>
+    </div>
+
+    <div class="helmet">
+      <div class="helmetBand"></div>
+    </div>
+
+    <div class="arm left"></div>
+    <div class="arm right"></div>
+
+    <div class="rifle"></div>
+
+  </div>
+
+  <div id="damage"></div>
+
+  <!-- CONTROLS -->
+
+  <div class="controls">
+
+    <div class="moveControls">
+      <button class="btn" id="left">◀</button>
+      <button class="btn" id="right">▶</button>
+    </div>
+
+    <button class="btn fire" id="fire">🔥</button>
+
+  </div>
+
+  <!-- START -->
+
+  <div class="screen" id="startScreen">
+
+    <div class="card">
+
+      <h1>⚔️ Action <span>Strike</span></h1>
+
+      <p>
+        Enter the battlefield, eliminate enemy soldiers
+        and complete the mission.
+        <br><br>
+        <b>15 enemies</b> must be eliminated.
+      </p>
+
+      <button class="start" id="start">
+        ▶ START MISSION
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- GAME OVER -->
+
+  <div class="screen hidden" id="gameOver">
+
+    <div class="card">
+
+      <h1>💀 GAME OVER</h1>
+
+      <p>
+        Your soldier was eliminated.
+        <br><br>
+        Enemies eliminated:
+        <b id="finalKills">0</b>
+      </p>
+
+      <button class="start" id="restart">
+        🔄 RESTART
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- WIN -->
+
+  <div class="screen hidden" id="winScreen">
+
+    <div class="card">
+
+      <h1>🏆 MISSION <span>COMPLETE</span></h1>
+
+      <p>
+        Excellent work, soldier!
+        <br>
+        All enemy forces have been eliminated.
+      </p>
+
+      <button class="start" id="again">
+        ▶ PLAY AGAIN
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+/* ==============================
+   ACTION STRIKE
+============================== */
+
+const game=document.getElementById("game");
+const player=document.getElementById("player");
+
+const startScreen=document.getElementById("startScreen");
+const gameOver=document.getElementById("gameOver");
+const winScreen=document.getElementById("winScreen");
+
+const healthFill=document.getElementById("healthFill");
+const ammoText=document.getElementById("ammo");
+const killsText=document.getElementById("kills");
+const finalKills=document.getElementById("finalKills");
+
+const damage=document.getElementById("damage");
+
+let running=false;
+
+let health=100;
+let ammo=30;
+let reserve=120;
+let kills=0;
+
+let playerX=50;
+
+let enemies=[];
+let bullets=[];
+let enemyBullets=[];
+
+let lastTime=0;
+let enemyTimer=0;
+let enemyShootTimer=0;
+
+let audioCtx=null;
+
+
+/* AUDIO */
+
+function audio(){
+
+  if(!audioCtx){
+    audioCtx=new(
+      window.AudioContext ||
+      window.webkitAudioContext
+    )();
+  }
+
+  if(audioCtx.state==="suspended")
+    audioCtx.resume();
+}
+
+function sound(freq,duration=.08,type="square"){
+
+  audio();
+
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
+
+  osc.type=type;
+  osc.frequency.value=freq;
+
+  gain.gain.setValueAtTime(
+    .04,
+    audioCtx.currentTime
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    .001,
+    audioCtx.currentTime+duration
+  );
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(
+    audioCtx.currentTime+duration
+  );
+}
+
+
+/* HUD */
+
+function updateHUD(){
+
+  healthFill.style.width=health+"%";
+
+  if(health>60)
+    healthFill.style.background="#4cae57";
+  else if(health>30)
+    healthFill.style.background="#c6a63e";
+  else
+    healthFill.style.background="#b83c32";
+
+  ammoText.textContent=ammo;
+  killsText.textContent=kills;
+}
+
+
+/* PLAYER MOVEMENT */
+
+function move(dir){
+
+  if(!running)return;
+
+  playerX+=dir*4;
+
+  playerX=Math.max(
+    25,
+    Math.min(75,playerX)
+  );
+
+  player.style.left=
+    playerX+"%";
+}
+
+
+/* KEYBOARD */
+
+document.addEventListener("keydown",e=>{
+
+  if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")
+    move(-1);
+
+  if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")
+    move(1);
+
+  if(e.code==="Space")
+    shoot();
+
+  if(e.key.toLowerCase()==="r")
+    reload();
+
+});
+
+
+/* BUTTONS */
+
+document.getElementById("left")
+.addEventListener("pointerdown",()=>move(-1));
+
+document.getElementById("right")
+.addEventListener("pointerdown",()=>move(1));
+
+document.getElementById("fire")
+.addEventListener("pointerdown",shoot);
+
+
+/* SHOOT */
+
+function shoot(){
+
+  if(!running)return;
+
+  if(ammo<=0){
+
+    sound(100,.12,"sawtooth");
+    return;
+  }
+
+  ammo--;
+
+  sound(180,.06,"square");
+  sound(90,.08,"sawtooth");
+
+  const rect=player.getBoundingClientRect();
+  const gameRect=game.getBoundingClientRect();
+
+  const b=document.createElement("div");
+
+  b.className="bullet";
+
+  b.style.left=
+    (rect.left-gameRect.left+rect.width/2)+"px";
+
+  b.style.top=
+    (rect.top-gameRect.top+35)+"px";
+
+  game.appendChild(b);
+
+  bullets.push({
+    el:b,
+    x:parseFloat(b.style.left),
+    y:parseFloat(b.style.top)
+  });
+
+  /* muzzle flash */
+
+  const m=document.createElement("div");
+
+  m.className="muzzle";
+
+  m.style.left=
+    (rect.left-gameRect.left+rect.width/2-17)+"px";
+
+  m.style.top=
+    (rect.top-gameRect.top+25)+"px";
+
+  game.appendChild(m);
+
+  setTimeout(()=>m.remove(),100);
+
+  updateHUD();
+}
+
+
+/* RELOAD */
+
+function reload(){
+
+  if(!running)return;
+
+  if(ammo>=30||reserve<=0)return;
+
+  sound(250,.1);
+
+  setTimeout(()=>{
+
+    const need=30-ammo;
+    const amount=Math.min(need,reserve);
+
+    ammo+=amount;
+    reserve-=amount;
+
+    updateHUD();
+
+  },600);
+}
+
+
+/* CREATE ENEMY */
+
+function createEnemy(){
+
+  const e=document.createElement("div");
+
+  e.className="enemy";
+
+  e.innerHTML=`
+
+    <div class="enemyHead"></div>
+    <div class="enemyHelmet"></div>
+
+    <div class="enemyBody"></div>
+
+    <div class="enemyArm left"></div>
+    <div class="enemyArm right"></div>
+
+    <div class="enemyGun"></div>
+  `;
+
+  const x=
+    28+Math.random()*44;
+
+  e.style.left=x+"%";
+  e.style.top="-140px";
+
+  game.appendChild(e);
+
+  enemies.push({
+    el:e,
+    x:x,
+    y:-140,
+    hp:3,
+    speed:55+Math.random()*30,
+    shoot:1+Math.random()*2
+  });
+
+}
+
+
+/* ENEMY SHOOT */
+
+function enemyShoot(enemy){
+
+  const eRect=
+    enemy.el.getBoundingClientRect();
+
+  const gRect=
+    game.getBoundingClientRect();
+
+  const b=document.createElement("div");
+
+  b.className="enemyBullet";
+
+  b.style.left=
+    (eRect.left-gRect.left+
+     eRect.width/2)+"px";
+
+  b.style.top=
+    (eRect.top-gRect.top+
+     eRect.height)+"px";
+
+  game.appendChild(b);
+
+  enemyBullets.push({
+    el:b,
+    x:parseFloat(b.style.left),
+    y:parseFloat(b.style.top),
+    speed:170
+  });
+
+  sound(260,.05,"square");
+}
+
+
+/* HIT ENEMY */
+
+function hitEnemy(enemy,index){
+
+  enemy.hp--;
+
+  sound(420,.05,"square");
+
+  if(enemy.hp<=0){
+
+    explosion(
+      enemy.el.offsetLeft,
+      enemy.el.offsetTop
+    );
+
+    enemy.el.remove();
+    enemies.splice(index,1);
+
+    kills++;
+
+    sound(120,.15,"sawtooth");
+    sound(650,.08,"square");
+
+    updateHUD();
+
+    if(kills>=15){
+      win();
+    }
+  }
+}
+
+
+/* EXPLOSION */
+
+function explosion(x,y){
+
+  const ex=document.createElement("div");
+
+  ex.className="explosion";
+
+  ex.style.left=x+"px";
+  ex.style.top=y+"px";
+
+  game.appendChild(ex);
+
+  sound(80,.18,"sawtooth");
+
+  setTimeout(()=>ex.remove(),350);
+}
+
+
+/* DAMAGE */
+
+function takeDamage(amount){
+
+  if(!running)return;
+
+  health-=amount;
+
+  health=Math.max(0,health);
+
+  damage.classList.remove("damageFlash");
+
+  void damage.offsetWidth;
+
+  damage.classList.add("damageFlash");
+
+  sound(100,.1,"sawtooth");
+
+  updateHUD();
+
+  if(health<=0)
+    lose();
+}
+
+
+/* COLLISION */
+
+function touching(a,b){
+
+  const r1=a.getBoundingClientRect();
+  const r2=b.getBoundingClientRect();
+
+  return !(
+    r1.right<r2.left ||
+    r1.left>r2.right ||
+    r1.bottom<r2.top ||
+    r1.top>r2.bottom
+  );
+}
+
+
+/* UPDATE BULLETS */
+
+function updateBullets(dt){
+
+  for(let i=bullets.length-1;i>=0;i--){
+
+    const b=bullets[i];
+
+    b.y-=650*dt;
+
+    b.el.style.top=b.y+"px";
+
+    if(b.y<-30){
+
+      b.el.remove();
+      bullets.splice(i,1);
+      continue;
+    }
+
+    for(let j=enemies.length-1;j>=0;j--){
+
+      const enemy=enemies[j];
+
+      if(touching(
+        b.el,
+        enemy.el
+      )){
+
+        b.el.remove();
+        bullets.splice(i,1);
+
+        hitEnemy(enemy,j);
+
+        break;
+      }
+
+    }
+
+  }
+}
+
+
+/* UPDATE ENEMIES */
+
+function updateEnemies(dt){
+
+  enemyTimer+=dt;
+
+  if(enemyTimer>1.25){
+
+    createEnemy();
+
+    enemyTimer=0;
+  }
+
+  for(let i=enemies.length-1;i>=0;i--){
+
+    const e=enemies[i];
+
+    e.y+=e.speed*dt;
+
+    e.el.style.top=e.y+"px";
+
+    e.shoot-=dt;
+
+    if(e.shoot<=0){
+
+      enemyShoot(e);
+
+      e.shoot=
+        1.5+Math.random()*2;
+    }
+
+    if(
+      e.y>game.clientHeight-180
+    ){
+
+      e.el.remove();
+      enemies.splice(i,1);
+
+      takeDamage(12);
+
+      continue;
+    }
+
+  }
+}
+
+
+/* ENEMY BULLETS */
+
+function updateEnemyBullets(dt){
+
+  for(let i=enemyBullets.length-1;i>=0;i--){
+
+    const b=enemyBullets[i];
+
+    b.y+=b.speed*dt;
+
+    b.el.style.top=b.y+"px";
+
+    if(b.y>game.clientHeight){
+
+      b.el.remove();
+      enemyBullets.splice(i,1);
+      continue;
+    }
+
+    if(touching(
+      b.el,
+      player
+    )){
+
+      b.el.remove();
+      enemyBullets.splice(i,1);
+
+      takeDamage(8);
+    }
+
+  }
+}
+
+
+/* ROAD */
+
+let roadOffset=0;
+
+function animateRoad(dt){
+
+  roadOffset+=220*dt;
+
+  if(roadOffset>120)
+    roadOffset=0;
+
+  document.getElementById("line1")
+    .style.top=roadOffset-100+"px";
+
+  document.getElementById("line2")
+    .style.top=roadOffset+80+"px";
+
+  document.getElementById("line3")
+    .style.top=roadOffset+260+"px";
+}
+
+
+/* GAME LOOP */
+
+function loop(time){
+
+  if(!running)return;
+
+  const dt=
+    Math.min(
+      .035,
+      (time-lastTime)/1000
+    );
+
+  lastTime=time;
+
+  animateRoad(dt);
+  updateEnemies(dt);
+  updateBullets(dt);
+  updateEnemyBullets(dt);
+
+  requestAnimationFrame(loop);
+}
+
+
+/* RESET */
+
+function reset(){
+
+  enemies.forEach(e=>e.el.remove());
+  bullets.forEach(b=>b.el.remove());
+  enemyBullets.forEach(b=>b.el.remove());
+
+  enemies=[];
+  bullets=[];
+  enemyBullets=[];
+
+  health=100;
+  ammo=30;
+  reserve=120;
+  kills=0;
+
+  playerX=50;
+
+  player.style.left="50%";
+
+  updateHUD();
+}
+
+
+/* START */
+
+function startGame(){
+
+  audio();
+
+  reset();
+
+  startScreen.classList.add("hidden");
+  gameOver.classList.add("hidden");
+  winScreen.classList.add("hidden");
+
+  running=true;
+
+  lastTime=
+    performance.now();
+
+  requestAnimationFrame(loop);
+}
+
+
+/* LOSE */
+
+function lose(){
+
+  running=false;
+
+  finalKills.textContent=kills;
+
+  gameOver.classList.remove("hidden");
+
+  sound(70,.4,"sawtooth");
+}
+
+
+/* WIN */
+
+function win(){
+
+  running=false;
+
+  winScreen.classList.remove("hidden");
+
+  sound(600,.12,"square");
+
+  setTimeout(
+    ()=>sound(900,.2,"square"),
+    150
+  );
+}
+
+
+/* BUTTON EVENTS */
+
+document.getElementById("start")
+.addEventListener("click",startGame);
+
+document.getElementById("restart")
+.addEventListener("click",startGame);
+
+document.getElementById("again")
+.addEventListener("click",startGame);
+
+
+/* INITIAL */
+
+updateHUD();
+
+</script>
+
+</body>
+</html>

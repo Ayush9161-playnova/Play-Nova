@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PlayNova - Profile</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="page-header">
+
+        <nav class="navbar">
+
+            <div class="logo">
+                PlayNova<span>.</span>
+            </div>
+
+            <ul class="nav-links">
+
+                <li>
+                    <a href="index.html">Home</a>
+                </li>
+
+                <li>
+                    <a href="games.html">Games</a>
+                </li>
+
+                <li>
+                    <a href="profile.html">Profile</a>
+                </li>
+
+                <li>
+                    <a href="about.html">About</a>
+                </li>
+
+                <li>
+                    <a href="contact.html">Contact</a>
+                </li>
+
+            </ul>
+
+            <div class="nav-right">
+
+                <a href="games.html" class="btn">
+                    🎮 Games
+                </a>
+
+                <div class="menu-btn">
+                    ☰
+                </div>
+
+            </div>
+
+        </nav>
+
+    </header>
+
+
+    <!-- ================= PROFILE ================= -->
+
+    <main>
+
+        <section style="padding:70px 8% 60px;">
+
+            <div class="section-heading">
+
+                <span>PLAYNOVA PROFILE</span>
+
+                <h2>
+                    👤 My Profile
+                </h2>
+
+                <p>
+                    Manage your PlayNova profile and favorite games.
+                </p>
+
+            </div>
+
+
+            <!-- USER PROFILE CARD -->
+
+            <div style="
+                max-width:700px;
+                margin:0 auto 50px;
+                padding:35px;
+                background:#111a2e;
+                border:1px solid rgba(56,189,248,.15);
+                border-radius:20px;
+                text-align:center;
+            ">
+
+                <div style="
+                    width:80px;
+                    height:80px;
+                    margin:0 auto 20px;
+                    border-radius:50%;
+                    background:#172554;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:40px;
+                ">
+                    👤
+                </div>
+
+                <h2>
+                    Welcome,
+                    <span id="username">Player</span>! 🎮
+                </h2>
+
+                <p style="
+                    color:#94a3b8;
+                    margin:10px 0 25px;
+                ">
+                    Welcome to your PlayNova profile.
+                </p>
+
+                <button
+                    id="logoutBtn"
+                    class="btn"
+                    type="button"
+                >
+                    🚪 Logout
+                </button>
+
+            </div>
+
+
+            <!-- ================= FAVORITE GAMES ================= -->
+
+            <div>
+
+                <div class="section-heading">
+
+                    <span>YOUR COLLECTION</span>
+
+                    <h2>
+                        ❤️ Favorite Games
+                    </h2>
+
+                    <p>
+                        Your favorite games will appear here.
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="favoriteGames"
+                    style="
+                        max-width:1100px;
+                        margin:auto;
+                        display:grid;
+                        grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+                        gap:20px;
+                    "
+                >
+
+                    <div style="
+                        grid-column:1/-1;
+                        text-align:center;
+                        padding:40px;
+                        background:#111a2e;
+                        border:1px solid #1e293b;
+                        border-radius:18px;
+                    ">
+
+                        <div style="font-size:40px;">
+                            🎮
+                        </div>
+
+                        <h3 style="margin:10px 0;">
+                            No Favorite Games Yet
+                        </h3>
+
+                        <p style="
+                            color:#94a3b8;
+                            margin-bottom:20px;
+                        ">
+                            Add games to your favorites and they will
+                            appear here.
+                        </p>
+
+                        <a href="games.html" class="btn">
+                            🎮 Browse Games
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <p>
+            © 2026 PlayNova. All Rights Reserved.
+        </p>
+
+    </footer>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script>
+
+        /* ================= USERNAME ================= */
+
+        const usernameElement =
+            document.getElementById("username");
+
+        const savedUsername =
+            localStorage.getItem("username");
+
+        if (savedUsername) {
+
+            usernameElement.textContent =
+                savedUsername;
+
+        }
+
+
+        /* ================= FAVORITE GAMES ================= */
+
+        const favoriteGames =
+            document.getElementById("favoriteGames");
+
+        let favorites =
+            JSON.parse(
+                localStorage.getItem("favorites") || "[]"
+            );
+
+
+        function displayFavorites() {
+
+            favoriteGames.innerHTML = "";
+
+
+            if (favorites.length === 0) {
+
+                favoriteGames.innerHTML = `
+
+                    <div style="
+                        grid-column:1/-1;
+                        text-align:center;
+                        padding:40px;
+                        background:#111a2e;
+                        border:1px solid #1e293b;
+                        border-radius:18px;
+                    ">
+
+                        <div style="font-size:40px;">
+                            🎮
+                        </div>
+
+                        <h3 style="margin:10px 0;">
+                            No Favorite Games Yet
+                        </h3>
+
+                        <p style="
+                            color:#94a3b8;
+                            margin-bottom:20px;
+                        ">
+                            Add games to your favorites and they
+                            will appear here.
+                        </p>
+
+                        <a href="games.html" class="btn">
+                            🎮 Browse Games
+                        </a>
+
+                    </div>
+
+                `;
+
+                return;
+            }
+
+
+            favorites.forEach(function(game) {
+
+                let title;
+                let image;
+
+
+                if (typeof game === "string") {
+
+                    title = game;
+                    image = "";
+
+                } else {
+
+                    title = game.title || "Game";
+                    image = game.image || "";
+
+                }
+
+
+                const card =
+                    document.createElement("div");
+
+
+                card.style.background =
+                    "#111a2e";
+
+                card.style.border =
+                    "1px solid #1e293b";
+
+                card.style.borderRadius =
+                    "18px";
+
+                card.style.padding =
+                    "15px";
+
+                card.style.textAlign =
+                    "center";
+
+
+                if (image) {
+
+                    const img =
+                        document.createElement("img");
+
+                    img.src = image;
+
+                    img.alt = title;
+
+                    img.style.width = "100%";
+
+                    img.style.height = "140px";
+
+                    img.style.objectFit = "cover";
+
+                    img.style.borderRadius = "12px";
+
+                    img.style.marginBottom = "12px";
+
+                    card.appendChild(img);
+
+                }
+
+
+                const heading =
+                    document.createElement("h3");
+
+                heading.textContent =
+                    title;
+
+                heading.style.marginBottom =
+                    "12px";
+
+                card.appendChild(heading);
+
+
+                const removeButton =
+                    document.createElement("button");
+
+                removeButton.textContent =
+                    "❌ Remove";
+
+                removeButton.type =
+                    "button";
+
+                removeButton.className =
+                    "btn";
+
+                removeButton.style.background =
+                    "#1e293b";
+
+                removeButton.style.boxShadow =
+                    "none";
+
+
+                removeButton.onclick =
+                    function () {
+
+                        favorites =
+                            favorites.filter(
+                                function(item) {
+
+                                    if (
+                                        typeof item === "string"
+                                    ) {
+
+                                        return item !== title;
+
+                                    }
+
+                                    return item.title !== title;
+
+                                }
+                            );
+
+
+                        localStorage.setItem(
+                            "favorites",
+                            JSON.stringify(favorites)
+                        );
+
+
+                        displayFavorites();
+
+                    };
+
+
+                card.appendChild(removeButton);
+
+                favoriteGames.appendChild(card);
+
+            });
+
+        }
+
+
+        displayFavorites();
+
+
+        /* ================= LOGOUT ================= */
+
+        const logoutBtn =
+            document.getElementById("logoutBtn");
+
+
+        logoutBtn.addEventListener(
+            "click",
+            function () {
+
+                localStorage.removeItem("username");
+                localStorage.removeItem("email");
+                localStorage.removeItem("password");
+                localStorage.removeItem("loggedIn");
+
+                alert("✅ Logged Out Successfully!");
+
+                window.location.href =
+                    "index.html";
+
+            }
+        );
+
+
+        /* ================= MOBILE MENU ================= */
+
+        const menuBtn =
+            document.querySelector(".menu-btn");
+
+        const navLinks =
+            document.querySelector(".nav-links");
+
+
+        if (menuBtn && navLinks) {
+
+            menuBtn.addEventListener(
+                "click",
+                function () {
+
+                    navLinks.classList.toggle("active");
+
+                }
+            );
+
+
+            document.querySelectorAll(
+                ".nav-links a"
+            ).forEach(function(link) {
+
+                link.addEventListener(
+                    "click",
+                    function () {
+
+                        navLinks.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+            });
+
+        }
+
+    </script>
+
+</body>
+
+</html>
