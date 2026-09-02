@@ -18,7 +18,9 @@
 
 <meta name="theme-color" content="#0f172a">
 
+
 <!-- Open Graph / Social Sharing -->
+
 <meta property="og:title" content="PlayNova - Free Online Games">
 
 <meta property="og:description" content="Discover and play exciting free online racing, action, puzzle and sports games on PlayNova.">
@@ -33,6 +35,7 @@
 
 
 <!-- Twitter / Social Preview -->
+
 <meta name="twitter:card" content="summary_large_image">
 
 <meta name="twitter:title" content="PlayNova - Free Online Games">
@@ -43,14 +46,17 @@
 
 
 <!-- Canonical URL -->
+
 <link rel="canonical" href="https://ayush9161-playnova.github.io/Play-Nova/">
 
 
 <!-- Favicon -->
+
 <link rel="icon" href="images/car-racing.jpg">
 
 
 <!-- Google Fonts -->
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,6 +68,7 @@ rel="stylesheet"
 
 
 <!-- Main CSS -->
+
 <link rel="stylesheet" href="style.css">
 
 </head>
@@ -69,6 +76,10 @@ rel="stylesheet"
 
 <body>
 
+
+<!-- =========================
+     NAVBAR
+========================= -->
 
 <header>
 
@@ -106,10 +117,6 @@ PlayNova<span>.</span>
 
 <div class="nav-right">
 
-<a href="profile.html" class="btn" id="loginBtn">
-Login
-</a>
-
 <div class="menu-btn">
 ☰
 </div>
@@ -118,6 +125,10 @@ Login
 
 </nav>
 
+
+<!-- =========================
+     HERO SECTION
+========================= -->
 
 <section class="hero" id="home">
 
@@ -165,7 +176,9 @@ loading="eager"
 
 
 
-<!-- SEARCH -->
+<!-- =========================
+     SEARCH
+========================= -->
 
 <div class="search-section">
 
@@ -181,7 +194,9 @@ aria-label="Search games"
 
 
 
-<!-- GAME FILTER -->
+<!-- =========================
+     GAME FILTER
+========================= -->
 
 <div class="game-filter">
 
@@ -192,12 +207,14 @@ data-filter="all"
 All Games
 </button>
 
+
 <button
 class="filter-btn"
 data-filter="racing"
 >
 🏎️ Racing
 </button>
+
 
 <button
 class="filter-btn"
@@ -206,12 +223,14 @@ data-filter="action"
 🔫 Action
 </button>
 
+
 <button
 class="filter-btn"
 data-filter="puzzle"
 >
 🧩 Puzzle
 </button>
+
 
 <button
 class="filter-btn"
@@ -224,11 +243,15 @@ data-filter="sports"
 
 
 
-<!-- POPULAR GAMES -->
+<!-- =========================
+     POPULAR GAMES
+========================= -->
 
 <section id="games">
 
-<h2>Popular Free Online Games</h2>
+<h2>
+Popular Free Online Games
+</h2>
 
 
 <div id="gamesContainer">
@@ -444,7 +467,9 @@ aria-label="Add Sports Game to Favorites"
 
 
 
-<!-- TRENDING GAMES -->
+<!-- =========================
+     TRENDING GAMES
+========================= -->
 
 <section
 id="trending"
@@ -528,7 +553,9 @@ Sports Game
 
 
 
-<!-- ABOUT PLAYNOVA -->
+<!-- =========================
+     ABOUT PLAYNOVA
+========================= -->
 
 <section
 id="about"
@@ -661,7 +688,9 @@ Designed for both desktop and mobile screens.
 
 
 
-<!-- FOOTER -->
+<!-- =========================
+     FOOTER
+========================= -->
 
 <footer>
 
@@ -673,123 +702,9 @@ Designed for both desktop and mobile screens.
 
 
 
-<!-- LOGIN POPUP -->
-
-<div
-id="loginPopup"
-class="popup"
->
-
-<div class="popup-content">
-
-<span id="closePopup">
-&times;
-</span>
-
-<h2>
-Login to PlayNova
-</h2>
-
-
-<input
-type="text"
-id="username"
-placeholder="Username"
->
-
-
-<input
-type="password"
-id="password"
-placeholder="Password"
->
-
-
-<button
-id="loginSubmit"
-class="btn"
-style="width:100%; margin-top:10px;"
->
-Login
-</button>
-
-
-<p
-style="margin-top:15px; color:#94a3b8; font-size:14px;"
->
-
-Don't have an account?
-
-<a
-href="#"
-id="showSignup"
-style="color:#38bdf8; font-weight:600;"
->
-Sign Up
-</a>
-
-</p>
-
-</div>
-
-</div>
-
-
-
-<!-- SIGNUP POPUP -->
-
-<div
-id="signupPopup"
-class="popup"
->
-
-<div class="popup-content">
-
-<span id="closeSignup">
-&times;
-</span>
-
-<h2>
-Create Account
-</h2>
-
-
-<input
-type="text"
-id="signupUsername"
-placeholder="Choose Username"
->
-
-
-<input
-type="email"
-id="signupEmail"
-placeholder="Your Email"
->
-
-
-<input
-type="password"
-id="signupPassword"
-placeholder="Create Password"
->
-
-
-<button
-id="signupSubmit"
-class="btn"
-style="width:100%; margin-top:10px;"
->
-Sign Up
-</button>
-
-</div>
-
-</div>
-
-
-
-<!-- GAME POPUP -->
+<!-- =========================
+     GAME POPUP
+========================= -->
 
 <div
 id="gamePopup"
@@ -833,14 +748,9 @@ style="width:100%;"
 
 
 
-<!-- EMAILJS -->
-
-<script
-src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
-></script>
-
-
-<!-- PLAYNOVA JAVASCRIPT -->
+<!-- =========================
+     PLAYNOVA JAVASCRIPT
+========================= -->
 
 <script src="home.js"></script>
 
