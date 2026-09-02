@@ -73,18 +73,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         gameCards.forEach(card => {
 
-            /* =========================
-               FILTER CHECK
-            ========================= */
+            /* FILTER CHECK */
 
             const matchesFilter =
                 currentFilter === "all" ||
                 card.classList.contains(currentFilter);
 
 
-            /* =========================
-               SEARCH DATA
-            ========================= */
+            /* SEARCH DATA */
 
             const dataTitle =
                 card.dataset.title || "";
@@ -92,16 +88,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const dataDescription =
                 card.dataset.desc || "";
 
-
             const visibleTitle =
                 card.querySelector("h3")
                 ?.textContent || "";
 
-
             const visibleDescription =
                 card.querySelector("p")
                 ?.textContent || "";
-
 
             const category =
                 currentFilter === "all"
@@ -109,9 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     : currentFilter;
 
 
-            /* =========================
-               COMBINE ALL SEARCH TEXT
-            ========================= */
+            /* COMBINE SEARCH TEXT */
 
             const searchableText = (
 
@@ -124,18 +115,14 @@ document.addEventListener("DOMContentLoaded", () => {
             ).toLowerCase();
 
 
-            /* =========================
-               SEARCH CHECK
-            ========================= */
+            /* SEARCH CHECK */
 
             const matchesSearch =
                 searchText === "" ||
                 searchableText.includes(searchText);
 
 
-            /* =========================
-               SHOW / HIDE
-            ========================= */
+            /* SHOW / HIDE */
 
             if (
                 matchesFilter &&
@@ -185,13 +172,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 btn.classList.remove("active");
             });
 
-
             button.classList.add("active");
-
 
             currentFilter =
                 button.dataset.filter || "all";
-
 
             updateGames();
 
@@ -248,6 +232,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             card.addEventListener("click", event => {
 
+                /*
+                 Don't open popup when
+                 clicking Play Now or Favorite.
+                */
+
                 if (
                     event.target.closest("a") ||
                     event.target.closest("button")
@@ -275,10 +264,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 gameTitle.textContent =
                     title;
 
-
                 gameDescription.textContent =
                     description;
-
 
                 playGameBtn.href =
                     gameLink;
@@ -292,6 +279,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
 
+        /* CLOSE GAME POPUP */
+
         closeGamePopup.addEventListener(
             "click",
             () => {
@@ -302,6 +291,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         );
 
+
+        /* CLOSE BY CLICKING OUTSIDE */
 
         gamePopup.addEventListener(
             "click",
@@ -323,395 +314,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================
-       LOGIN
-    ========================= */
-
-    const loginBtn =
-        document.getElementById("loginBtn");
-
-    const loginPopup =
-        document.getElementById("loginPopup");
-
-    const closePopup =
-        document.getElementById("closePopup");
-
-
-    if (
-        loginBtn &&
-        loginPopup &&
-        closePopup
-    ) {
-
-        loginBtn.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    loginPopup.style.display !== "flex"
-                ) {
-
-                    event.preventDefault();
-
-                    loginPopup.style.display =
-                        "flex";
-
-                }
-
-            }
-        );
-
-
-        closePopup.addEventListener(
-            "click",
-            () => {
-
-                loginPopup.style.display =
-                    "none";
-
-            }
-        );
-
-
-        loginPopup.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target === loginPopup
-                ) {
-
-                    loginPopup.style.display =
-                        "none";
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* =========================
-       SIGNUP POPUP
-    ========================= */
-
-    const signupPopup =
-        document.getElementById("signupPopup");
-
-    const showSignup =
-        document.getElementById("showSignup");
-
-    const closeSignup =
-        document.getElementById("closeSignup");
-
-
-    if (
-        signupPopup &&
-        showSignup &&
-        closeSignup
-    ) {
-
-        showSignup.addEventListener(
-            "click",
-            event => {
-
-                event.preventDefault();
-
-                if (loginPopup) {
-
-                    loginPopup.style.display =
-                        "none";
-
-                }
-
-                signupPopup.style.display =
-                    "flex";
-
-            }
-        );
-
-
-        closeSignup.addEventListener(
-            "click",
-            () => {
-
-                signupPopup.style.display =
-                    "none";
-
-            }
-        );
-
-
-        signupPopup.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target === signupPopup
-                ) {
-
-                    signupPopup.style.display =
-                        "none";
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* =========================
-       SIGNUP
-    ========================= */
-
-    const signupSubmit =
-        document.getElementById("signupSubmit");
-
-
-    if (signupSubmit) {
-
-        signupSubmit.addEventListener(
-            "click",
-            () => {
-
-                const username =
-                    document.getElementById(
-                        "signupUsername"
-                    )?.value.trim();
-
-
-                const email =
-                    document.getElementById(
-                        "signupEmail"
-                    )?.value.trim();
-
-
-                const password =
-                    document.getElementById(
-                        "signupPassword"
-                    )?.value;
-
-
-                if (
-                    !username ||
-                    !email ||
-                    !password
-                ) {
-
-                    alert(
-                        "Please fill all fields!"
-                    );
-
-                    return;
-
-                }
-
-
-                if (password.length < 6) {
-
-                    alert(
-                        "Password must contain at least 6 characters."
-                    );
-
-                    return;
-
-                }
-
-
-                localStorage.setItem(
-                    "username",
-                    username
-                );
-
-                localStorage.setItem(
-                    "email",
-                    email
-                );
-
-                localStorage.setItem(
-                    "password",
-                    password
-                );
-
-
-                alert(
-                    "✅ Account Created Successfully!"
-                );
-
-
-                if (signupPopup) {
-
-                    signupPopup.style.display =
-                        "none";
-
-                }
-
-
-                if (loginPopup) {
-
-                    loginPopup.style.display =
-                        "flex";
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* =========================
-       LOGIN SUBMIT
-    ========================= */
-
-    const loginSubmit =
-        document.getElementById("loginSubmit");
-
-
-    if (loginSubmit) {
-
-        loginSubmit.addEventListener(
-            "click",
-            () => {
-
-                const username =
-                    document.getElementById(
-                        "username"
-                    )?.value.trim();
-
-
-                const password =
-                    document.getElementById(
-                        "password"
-                    )?.value;
-
-
-                const savedUsername =
-                    localStorage.getItem(
-                        "username"
-                    );
-
-
-                const savedPassword =
-                    localStorage.getItem(
-                        "password"
-                    );
-
-
-                if (
-                    username === savedUsername &&
-                    password === savedPassword
-                ) {
-
-                    alert(
-                        "✅ Login Successful!"
-                    );
-
-
-                    if (loginPopup) {
-
-                        loginPopup.style.display =
-                            "none";
-
-                    }
-
-
-                    if (loginBtn) {
-
-                        loginBtn.textContent =
-                            username;
-
-                    }
-
-                } else {
-
-                    alert(
-                        "❌ Invalid Username or Password!"
-                    );
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* =========================
-       REMEMBER USER
-    ========================= */
-
-    if (loginBtn) {
-
-        const savedUser =
-            localStorage.getItem(
-                "username"
-            );
-
-
-        if (savedUser) {
-
-            loginBtn.textContent =
-                savedUser;
-
-        }
-
-    }
-
-
-    /* =========================
-       LOGOUT
-    ========================= */
-
-    if (loginBtn) {
-
-        loginBtn.addEventListener(
-            "dblclick",
-            () => {
-
-                const savedUser =
-                    localStorage.getItem(
-                        "username"
-                    );
-
-
-                if (!savedUser) {
-                    return;
-                }
-
-
-                if (
-                    confirm(
-                        "Do you want to Logout?"
-                    )
-                ) {
-
-                    localStorage.removeItem(
-                        "username"
-                    );
-
-                    localStorage.removeItem(
-                        "email"
-                    );
-
-                    localStorage.removeItem(
-                        "password"
-                    );
-
-                    location.reload();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* =========================
        CONTACT FORM
-    ========================= */
+       ========================= */
 
     const contactForm =
         document.querySelector(
@@ -804,7 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================
-       RUN GAME SEARCH/FILTER
+       RUN SEARCH/FILTER
        ON PAGE LOAD
     ========================= */
 
