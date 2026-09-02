@@ -1,268 +1,850 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PlayNova - Ultimate Free Online Games</title>
 
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PlayNova - Free Online Games | Racing, Action, Puzzle & Sports</title>
+
+<meta name="description" content="Play exciting free online games on PlayNova. Enjoy racing, action, puzzle and sports games directly in your browser on desktop and mobile.">
+
+<meta name="keywords" content="PlayNova, free online games, browser games, racing games, action games, puzzle games, sports games, online gaming">
+
+<meta name="author" content="PlayNova">
+
+<meta name="robots" content="index, follow">
+
+<meta name="theme-color" content="#0f172a">
+
+<!-- Open Graph / Social Sharing -->
+<meta property="og:title" content="PlayNova - Free Online Games">
+
+<meta property="og:description" content="Discover and play exciting free online racing, action, puzzle and sports games on PlayNova.">
+
+<meta property="og:type" content="website">
+
+<meta property="og:url" content="https://ayush9161-playnova.github.io/Play-Nova/">
+
+<meta property="og:image" content="https://ayush9161-playnova.github.io/Play-Nova/images/car-racing.jpg">
+
+<meta property="og:site_name" content="PlayNova">
+
+
+<!-- Twitter / Social Preview -->
+<meta name="twitter:card" content="summary_large_image">
+
+<meta name="twitter:title" content="PlayNova - Free Online Games">
+
+<meta name="twitter:description" content="Play free racing, action, puzzle and sports games online with PlayNova.">
+
+<meta name="twitter:image" content="https://ayush9161-playnova.github.io/Play-Nova/images/car-racing.jpg">
+
+
+<!-- Canonical URL -->
+<link rel="canonical" href="https://ayush9161-playnova.github.io/Play-Nova/">
+
+
+<!-- Favicon -->
+<link rel="icon" href="images/car-racing.jpg">
+
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap"
+rel="stylesheet"
+>
+
+
+<!-- Main CSS -->
 <link rel="stylesheet" href="style.css">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 
 <body>
 
+
 <header>
+
 <nav class="navbar">
-<div class="logo">PlayNova<span>.</span></div>
+
+<div class="logo">
+PlayNova<span>.</span>
+</div>
+
 
 <ul class="nav-links">
-<li><a href="index.html">Home</a></li>
-<li><a href="games.html">Games</a></li>
-<li><a href="profile.html">Profile</a></li>
-<li><a href="about.html">About</a></li>
-<li><a href="contact.html">Contact</a></li>
+
+<li>
+<a href="index.html">Home</a>
+</li>
+
+<li>
+<a href="games.html">Games</a>
+</li>
+
+<li>
+<a href="profile.html">Profile</a>
+</li>
+
+<li>
+<a href="about.html">About</a>
+</li>
+
+<li>
+<a href="contact.html">Contact</a>
+</li>
+
 </ul>
 
+
 <div class="nav-right">
-<a href="profile.html" class="btn" id="loginBtn">Login</a>
-<div class="menu-btn">☰</div>
+
+<a href="profile.html" class="btn" id="loginBtn">
+Login
+</a>
+
+<div class="menu-btn">
+☰
 </div>
+
+</div>
+
 </nav>
 
+
 <section class="hero" id="home">
+
 <div class="hero-text">
-<h1>Play Free Games Anytime, Anywhere</h1>
+
+<h1>
+Play Free Online Games Anytime, Anywhere
+</h1>
+
 <p>
-Immerse yourself in the best free online games with PlayNova. 
-High-speed racing, action-packed adventures, brain puzzles, and sports in one ultimate portal.
+Immerse yourself in exciting free online games with PlayNova.
+Enjoy high-speed racing, action-packed adventures,
+brain puzzles and sports games in one gaming portal.
 </p>
+
+
 <div class="hero-buttons">
-<a href="games.html" class="btn">🎮 Play Games</a>
-<a href="#tranding" class="btn btn2">🔥 Trending Now</a>
-</div>
+
+<a href="games.html" class="btn">
+🎮 Play Games
+</a>
+
+<a href="#trending" class="btn btn2">
+🔥 Trending Now
+</a>
+
 </div>
 
-<div class="hero-image">
-<img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=700" alt="Gaming">
 </div>
+
+
+<div class="hero-image">
+
+<img
+src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=700"
+alt="Gaming setup and online gaming experience"
+loading="eager"
+>
+
+</div>
+
 </section>
+
 </header>
+
+
+
+<!-- SEARCH -->
 
 <div class="search-section">
 
-    <input
-        type="search"
-        id="searchBox"
-        placeholder="🔍 Search Games..."
-        autocomplete="off"
-    >
+<input
+type="search"
+id="searchBox"
+placeholder="🔍 Search Games..."
+autocomplete="off"
+aria-label="Search games"
+>
 
 </div>
 
+
+
+<!-- GAME FILTER -->
 
 <div class="game-filter">
-    <button class="filter-btn active" data-filter="all">All Games</button>
-    <button class="filter-btn" data-filter="racing"> 🏎️ Racing</button>
-    <button class="filter-btn" data-filter="action"> 🔫 Action</button>
-    <button class="filter-btn" data-filter="puzzle"> 🧩 Puzzle</button>
-    <button class="filter-btn" data-filter="sports"> ⚽ Sports</button>
+
+<button
+class="filter-btn active"
+data-filter="all"
+>
+All Games
+</button>
+
+<button
+class="filter-btn"
+data-filter="racing"
+>
+🏎️ Racing
+</button>
+
+<button
+class="filter-btn"
+data-filter="action"
+>
+🔫 Action
+</button>
+
+<button
+class="filter-btn"
+data-filter="puzzle"
+>
+🧩 Puzzle
+</button>
+
+<button
+class="filter-btn"
+data-filter="sports"
+>
+⚽ Sports
+</button>
+
 </div>
 
+
+
+<!-- POPULAR GAMES -->
+
 <section id="games">
-<h2>Popular Games</h2>
+
+<h2>Popular Free Online Games</h2>
+
 
 <div id="gamesContainer">
 
-<div class="game-card racing" data-title="Car Racing" data-desc="High Speed Adrenaline Racing Game" data-link="https://playpager.com/hexgl/">
-    <img src="images/car-racing.jpg" alt="Car Racing">
-    <div class="card-body">
-        <h3>🏎️ Car Racing</h3>
-        <p>High Speed Racing Game</p>
-        <div class="card-footer-actions">
-            <a href="car-racing.html" target="_blank" class="btn play-now-link">Play Now</a>
-            <button class="favorite-btn" title="Add to Favorites">♡</button>
-        </div>
-    </div>
-</div>
 
-<div class="game-card action" data-title="Action Game" data-desc="Intense combat, fight and survive the battlefield." data-link="#">
-    <img src="images/action-game.jpg" alt="Action Game">
-    <div class="card-body">
-        <h3>🔫 Action Game</h3>
-        <p>Fight and Survive</p>
-        <div class="card-footer-actions">
-            <a href="action-game.html" class="btn play-now-link">Play Now</a>
-            <button class="favorite-btn" title="Add to Favorites">♡</button>
-        </div>
-    </div>
-</div>
+<!-- CAR RACING -->
 
-<div class="game-card puzzle" data-title="Puzzle Game" data-desc="Sharpen your mind and solve challenging puzzles." data-link="#">
-    <img src="images/puzzle-game.jpg" alt="Puzzle Game">
-    <div class="card-body">
-        <h3>🧩 Puzzle Game</h3>
-        <p>Train Your Brain</p>
-        <div class="card-footer-actions">
-            <a href="puzzle-game.html" class="btn play-now-link">Play Now</a>
-            <button class="favorite-btn" title="Add to Favorites">♡</button>
-        </div>
-    </div>
-</div>
+<div
+class="game-card racing"
+data-title="Car Racing"
+data-desc="High Speed Adrenaline Racing Game"
+data-link="https://playpager.com/hexgl/"
+>
 
-<div class="game-card sports" data-title="Sports Game" data-desc="Experience realistic football, basketball and more." data-link="#">
-    <img src="images/sports-game.jpg" alt="Sports Game">
-    <div class="card-body">
-        <h3>⚽ Sports Game</h3>
-        <p>Became A Champion</p>
-        <div class="card-footer-actions">
-            <a href="pro-penalty-tournament-2026.html" class="btn play-now-link">Play Now</a>
-            <button class="favorite-btn" title="Add to Favorites">♡</button>
-        </div>
-    </div>
-</div>
+<img
+src="images/car-racing.jpg"
+alt="Car Racing online game"
+loading="lazy"
+>
+
+<div class="card-body">
+
+<h3>
+🏎️ Car Racing
+</h3>
+
+<p>
+High Speed Racing Game
+</p>
+
+
+<div class="card-footer-actions">
+
+<a
+href="car-racing.html"
+target="_blank"
+class="btn play-now-link"
+>
+Play Now
+</a>
+
+<button
+class="favorite-btn"
+title="Add to Favorites"
+aria-label="Add Car Racing to Favorites"
+>
+♡
+</button>
 
 </div>
+
+</div>
+
+</div>
+
+
+
+<!-- ACTION GAME -->
+
+<div
+class="game-card action"
+data-title="Action Game"
+data-desc="Intense combat, fight and survive the battlefield."
+data-link="#"
+>
+
+<img
+src="images/action-game.jpg"
+alt="Action online game"
+loading="lazy"
+>
+
+<div class="card-body">
+
+<h3>
+🔫 Action Game
+</h3>
+
+<p>
+Fight and Survive
+</p>
+
+
+<div class="card-footer-actions">
+
+<a
+href="action-game.html"
+class="btn play-now-link"
+>
+Play Now
+</a>
+
+<button
+class="favorite-btn"
+title="Add to Favorites"
+aria-label="Add Action Game to Favorites"
+>
+♡
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- PUZZLE GAME -->
+
+<div
+class="game-card puzzle"
+data-title="Puzzle Game"
+data-desc="Sharpen your mind and solve challenging puzzles."
+data-link="#"
+>
+
+<img
+src="images/puzzle-game.jpg"
+alt="Puzzle online game"
+loading="lazy"
+>
+
+<div class="card-body">
+
+<h3>
+🧩 Puzzle Game
+</h3>
+
+<p>
+Train Your Brain
+</p>
+
+
+<div class="card-footer-actions">
+
+<a
+href="puzzle-game.html"
+class="btn play-now-link"
+>
+Play Now
+</a>
+
+<button
+class="favorite-btn"
+title="Add to Favorites"
+aria-label="Add Puzzle Game to Favorites"
+>
+♡
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- SPORTS GAME -->
+
+<div
+class="game-card sports"
+data-title="Sports Game"
+data-desc="Experience realistic football, basketball and more."
+data-link="#"
+>
+
+<img
+src="images/sports-game.jpg"
+alt="Sports online game"
+loading="lazy"
+>
+
+<div class="card-body">
+
+<h3>
+⚽ Sports Game
+</h3>
+
+<p>
+Become A Champion
+</p>
+
+
+<div class="card-footer-actions">
+
+<a
+href="pro-penalty-tournament-2026.html"
+class="btn play-now-link"
+>
+Play Now
+</a>
+
+<button
+class="favorite-btn"
+title="Add to Favorites"
+aria-label="Add Sports Game to Favorites"
+>
+♡
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+
 </section>
 
-<section id="trending" class="trending">
-<h2>🔥 Trending Games</h2>
+
+
+<!-- TRENDING GAMES -->
+
+<section
+id="trending"
+class="trending"
+>
+
+<h2>
+🔥 Trending Games
+</h2>
+
+
 <div class="trending-container">
 
-<div class="trend-card">
-<img src="images/car-racing.jpg" alt="Car Racing">
-<h3>Car Racing</h3>
-</div>
 
 <div class="trend-card">
-<img src="images/action-game.jpg" alt="Action Game">
-<h3>Action Game</h3>
+
+<img
+src="images/car-racing.jpg"
+alt="Trending Car Racing game"
+loading="lazy"
+>
+
+<h3>
+Car Racing
+</h3>
+
 </div>
+
+
 
 <div class="trend-card">
-<img src="images/puzzle-game.jpg" alt="Puzzle Game">
-<h3>Puzzle Game</h3>
+
+<img
+src="images/action-game.jpg"
+alt="Trending Action Game"
+loading="lazy"
+>
+
+<h3>
+Action Game
+</h3>
+
 </div>
+
+
 
 <div class="trend-card">
-<img src="images/sports-game.jpg" alt="Sports Game">
-<h3>Sports Game</h3>
-</div>
+
+<img
+src="images/puzzle-game.jpg"
+alt="Trending Puzzle Game"
+loading="lazy"
+>
+
+<h3>
+Puzzle Game
+</h3>
 
 </div>
+
+
+
+<div class="trend-card">
+
+<img
+src="images/sports-game.jpg"
+alt="Trending Sports Game"
+loading="lazy"
+>
+
+<h3>
+Sports Game
+</h3>
+
+</div>
+
+
+</div>
+
 </section>
 
-<!-- ================= ABOUT PLAYNOVA ================= -->
 
-<section id="about" class="about-section">
 
-    <div class="section-heading">
-        <span>ABOUT PLAYNOVA</span>
-        <h2>🎮 Your Gaming Universe</h2>
-        <p>
-            Discover exciting games, explore new challenges and start
-            playing instantly.
-        </p>
-    </div>
+<!-- ABOUT PLAYNOVA -->
 
-    <div class="about-content">
+<section
+id="about"
+class="about-section"
+>
 
-        <div class="about-text">
+<div class="section-heading">
 
-            <h3>Play • Discover • Compete • Repeat</h3>
+<span>
+ABOUT PLAYNOVA
+</span>
 
-            <p>
-                PlayNova is a gaming platform where players can discover
-                and enjoy exciting browser games in one place.
-            </p>
+<h2>
+🎮 Your Gaming Universe
+</h2>
 
-            <p>
-                From high-speed racing and action games to puzzles,
-                sports and strategy games, PlayNova is designed to make
-                gaming simple, fast and fun.
-            </p>
+<p>
+Discover exciting games, explore new challenges
+and start playing instantly.
+</p>
 
-            <p>
-                Our goal is to build a clean gaming hub where you can
-                quickly find a game, hit Play and start playing.
-            </p>
+</div>
 
-        </div>
 
-        <div class="about-features">
+<div class="about-content">
 
-            <div class="about-feature">
-                <div class="feature-icon">🎮</div>
-                <div>
-                    <h3>Free to Play</h3>
-                    <p>Enjoy exciting games without complicated setup.</p>
-                </div>
-            </div>
 
-            <div class="about-feature">
-                <div class="feature-icon">⚡</div>
-                <div>
-                    <h3>Fast & Simple</h3>
-                    <p>Find your favourite games quickly and easily.</p>
-                </div>
-            </div>
+<div class="about-text">
 
-            <div class="about-feature">
-                <div class="feature-icon">📱</div>
-                <div>
-                    <h3>Play Anywhere</h3>
-                    <p>Designed for both desktop and mobile screens.</p>
-                </div>
-            </div>
+<h3>
+Play • Discover • Compete • Repeat
+</h3>
 
-        </div>
 
-    </div>
+<p>
+PlayNova is a gaming platform where players can
+discover and enjoy exciting browser games in one place.
+</p>
+
+
+<p>
+From high-speed racing and action games to puzzles,
+sports and strategy games, PlayNova is designed to make
+gaming simple, fast and fun.
+</p>
+
+
+<p>
+Our goal is to build a clean gaming hub where you can
+quickly find a game, hit Play and start playing.
+</p>
+
+</div>
+
+
+
+<div class="about-features">
+
+
+<div class="about-feature">
+
+<div class="feature-icon">
+🎮
+</div>
+
+<div>
+
+<h3>
+Free to Play
+</h3>
+
+<p>
+Enjoy exciting games without complicated setup.
+</p>
+
+</div>
+
+</div>
+
+
+
+<div class="about-feature">
+
+<div class="feature-icon">
+⚡
+</div>
+
+<div>
+
+<h3>
+Fast & Simple
+</h3>
+
+<p>
+Find your favourite games quickly and easily.
+</p>
+
+</div>
+
+</div>
+
+
+
+<div class="about-feature">
+
+<div class="feature-icon">
+📱
+</div>
+
+<div>
+
+<h3>
+Play Anywhere
+</h3>
+
+<p>
+Designed for both desktop and mobile screens.
+</p>
+
+</div>
+
+</div>
+
+
+</div>
+
+</div>
 
 </section>
+
+
+
+<!-- FOOTER -->
 
 <footer>
-<p>© 2026 PlayNova. All Rights Reserved. Built for Gamers.</p>
+
+<p>
+© 2026 PlayNova. All Rights Reserved. Built for Gamers.
+</p>
+
 </footer>
 
-<!-- POPUPS -->
-<div id="loginPopup" class="popup">
-  <div class="popup-content">
-    <span id="closePopup">&times;</span>
-    <h2>Login to PlayNova</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <button id="loginSubmit" class="btn" style="width:100%; margin-top:10px;">Login</button>
-    <p style="margin-top:15px; color:#94a3b8; font-size:14px;">
-    Don't have an account? <a href="#" id="showSignup" style="color:#38bdf8; font-weight:600;">Sign Up</a>
-    </p>
-  </div>
+
+
+<!-- LOGIN POPUP -->
+
+<div
+id="loginPopup"
+class="popup"
+>
+
+<div class="popup-content">
+
+<span id="closePopup">
+&times;
+</span>
+
+<h2>
+Login to PlayNova
+</h2>
+
+
+<input
+type="text"
+id="username"
+placeholder="Username"
+>
+
+
+<input
+type="password"
+id="password"
+placeholder="Password"
+>
+
+
+<button
+id="loginSubmit"
+class="btn"
+style="width:100%; margin-top:10px;"
+>
+Login
+</button>
+
+
+<p
+style="margin-top:15px; color:#94a3b8; font-size:14px;"
+>
+
+Don't have an account?
+
+<a
+href="#"
+id="showSignup"
+style="color:#38bdf8; font-weight:600;"
+>
+Sign Up
+</a>
+
+</p>
+
 </div>
 
-<div id="signupPopup" class="popup">
-  <div class="popup-content">
-    <span id="closeSignup">&times;</span>
-    <h2>Create Account</h2>
-    <input type="text" id="signupUsername" placeholder="Choose Username">
-    <input type="email" id="signupEmail" placeholder="Your Email">
-    <input type="password" id="signupPassword" placeholder="Create Password">
-    <button id="signupSubmit" class="btn" style="width:100%; margin-top:10px;">Sign Up</button>
-  </div>
 </div>
 
-<div id="gamePopup" class="popup">
-  <div class="popup-content" style="width:500px; max-width:95%;">
-    <span id="closeGamePopup">&times;</span>
-    <h2 id="gameTitle">Game Title</h2>
-    <p id="gameDescription" style="margin-bottom:20px;">Game description goes here...</p>
-    <a id="playGameBtn" href="#" target="_blank" class="btn" style="width:100%;">▶ Launch Game</a>
-  </div>
+
+
+<!-- SIGNUP POPUP -->
+
+<div
+id="signupPopup"
+class="popup"
+>
+
+<div class="popup-content">
+
+<span id="closeSignup">
+&times;
+</span>
+
+<h2>
+Create Account
+</h2>
+
+
+<input
+type="text"
+id="signupUsername"
+placeholder="Choose Username"
+>
+
+
+<input
+type="email"
+id="signupEmail"
+placeholder="Your Email"
+>
+
+
+<input
+type="password"
+id="signupPassword"
+placeholder="Create Password"
+>
+
+
+<button
+id="signupSubmit"
+class="btn"
+style="width:100%; margin-top:10px;"
+>
+Sign Up
+</button>
+
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</div>
+
+
+
+<!-- GAME POPUP -->
+
+<div
+id="gamePopup"
+class="popup"
+>
+
+<div
+class="popup-content"
+style="width:500px; max-width:95%;"
+>
+
+<span id="closeGamePopup">
+&times;
+</span>
+
+<h2 id="gameTitle">
+Game Title
+</h2>
+
+<p
+id="gameDescription"
+style="margin-bottom:20px;"
+>
+Game description goes here...
+</p>
+
+
+<a
+id="playGameBtn"
+href="#"
+target="_blank"
+class="btn"
+style="width:100%;"
+>
+▶ Launch Game
+</a>
+
+</div>
+
+</div>
+
+
+
+<!-- EMAILJS -->
+
+<script
+src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
+></script>
+
+
+<!-- PLAYNOVA JAVASCRIPT -->
 
 <script src="home.js"></script>
+
+
 </body>
+
 </html>
